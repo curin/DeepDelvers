@@ -20,6 +20,10 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    maven {
+        name = "OctoStudios"
+        url = uri("https://maven.octo-studios.com/releases")
+    }
 }
 
 base {
@@ -98,6 +102,8 @@ dependencies {
     // For all intends and purposes: You can treat this dependency as if it is a normal library you would use.
     implementation "net.neoforged:neoforge:${neo_version}"
 
+    implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
@@ -131,6 +137,7 @@ tasks.withType(ProcessResources).configureEach {
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
             neo_version_range      : neo_version_range,
+            curios_version_range   : curios_version_range,
             loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
