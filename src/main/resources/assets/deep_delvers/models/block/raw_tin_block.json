@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "deep_delvers:block/raw_tin_block"
+  }
+}

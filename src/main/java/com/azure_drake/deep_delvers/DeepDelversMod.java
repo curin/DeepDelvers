@@ -1,6 +1,7 @@
 package com.azure_drake.deep_delvers;
 
 import com.azure_drake.deep_delvers.blocks.BlockManager;
+import com.azure_drake.deep_delvers.creativetab.CreativeTabManager;
 import com.azure_drake.deep_delvers.items.ItemManager;
 import org.slf4j.Logger;
 
@@ -37,19 +38,6 @@ public class DeepDelversMod
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "examplemod" namespace
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-
-
-    // Creates a creative tab with the id "examplemod:example_tab" for the example item, that is placed after the combat tab
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.examplemod")) //The language key for the title of your CreativeModeTab
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> ItemManager.BRONZE_INGOT.get().getDefaultInstance())
-            .displayItems((parameters, output) -> {
-                output.accept(ItemManager.BRONZE_INGOT.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
-            }).build());
-
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public DeepDelversMod(IEventBus modEventBus, ModContainer modContainer)
@@ -57,18 +45,15 @@ public class DeepDelversMod
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
+        // Register Blocks, Items, and CreativeTabs
         BlockManager.register(modEventBus);
         ItemManager.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so tabs get registered
-        CREATIVE_MODE_TABS.register(modEventBus);
+        CreativeTabManager.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
-
-        // Register the item to a creative tab
-        modEventBus.addListener(this::addCreative);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -85,13 +70,6 @@ public class DeepDelversMod
         LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber);
 
         Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
-    }
-
-    // Add the example block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event)
-    {
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS)
-            event.accept(ItemManager.BRONZE_BLOCK);
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

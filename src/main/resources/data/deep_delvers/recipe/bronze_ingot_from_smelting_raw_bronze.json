@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.7,
+  "group": "bronze_ingot",
+  "ingredient": {
+    "item": "deep_delvers:raw_bronze"
+  },
+  "result": {
+    "id": "deep_delvers:bronze_ingot"
+  }
+}

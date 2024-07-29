@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#deep_delvers:tin_generates_in",
+  "features": "deep_delvers:ore_tin",
+  "step": "underground_ores"
+}

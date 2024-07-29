@@ -1,0 +1,13 @@
+{
+  "item.deep_delvers.tin_ingot": "Tin Ingot",
+  "item.deep_delvers.raw_tin": "Raw Tin",
+  "item.deep_delvers.raw_bronze": "Raw Bronze Blend",
+  "item.deep_delvers.bronze_ingot": "Bronze Ingot",
+  "block.deep_delvers.tin_block": "Block of Tin",
+  "block.deep_delvers.tin_ore": "Tin Ore",
+  "block.deep_delvers.raw_tin_block": "Block of Raw Tin",
+  "block.deep_delvers.raw_bronze_block": "Block of Raw Bronze Blend",
+  "block.deep_delvers.deepslate_tin_ore": "Deepslate Tin Ore",
+  "block.deep_delvers.bronze_block": "Block of Bronze",
+  "itemGroup.deep_delvers": "Delvers of the Deep"
+}
