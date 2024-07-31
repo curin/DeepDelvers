@@ -2,7 +2,16 @@ package com.azure_drake.deep_delvers;
 
 import com.azure_drake.deep_delvers.blocks.BlockManager;
 import com.azure_drake.deep_delvers.creativetab.CreativeTabManager;
+import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
+import com.azure_drake.deep_delvers.dungeon.DungeonManager;
 import com.azure_drake.deep_delvers.items.ItemManager;
+import com.azure_drake.deep_delvers.portal.PortalID;
+import com.azure_drake.deep_delvers.world.DeepDelversData;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -62,14 +71,6 @@ public class DeepDelversMod
     private void commonSetup(final FMLCommonSetupEvent event)
     {
         // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
-
-        if (Config.logDirtBlock)
-            LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
-
-        LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber);
-
-        Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
@@ -77,7 +78,69 @@ public class DeepDelversMod
     public void onServerStarting(ServerStartingEvent event)
     {
         // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
+    }
+
+    @SubscribeEvent
+    public void onLivingDeath(LivingDeathEvent event)
+    {
+        if (event.getEntity().level().isClientSide || event.getEntity().getServer() == null ||
+                !(event.getEntity() instanceof Player player && player.level().dimension() == DungeonManager.DEEP_DUGEON))
+        {
+            return;
+        }
+
+        DeepDelversData data = DeepDelversData.get(player.getServer().getLevel(DungeonManager.DEEP_DUGEON));
+        String uuid = player.getStringUUID();
+        for(PortalID id : data.getAllDungeonIds())
+        {
+            DeepDungeon dungeon = data.getDungeon(id);
+            int index = dungeon.PlayersInside.indexOf(uuid);
+            if (index != -1)
+            {
+                dungeon.PlayersInside.remove(index);
+
+                if (dungeon.PlayersInside.size() == 0)
+                {
+                    data.removeDungeon(id);
+                    dungeon.Destroy(player.getServer(), false);
+                }
+                else
+                {
+                    data.putDungeon(id, dungeon);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event)
+    {
+        if (event.getEntity().level().isClientSide || event.getEntity().getServer() == null || event.getFrom() != DungeonManager.DEEP_DUGEON)
+        {
+            return;
+        }
+
+        DeepDelversData data = DeepDelversData.get(event.getEntity().getServer().getLevel(DungeonManager.DEEP_DUGEON));
+        String uuid = event.getEntity().getStringUUID();
+        for(PortalID id : data.getAllDungeonIds())
+        {
+            DeepDungeon dungeon = data.getDungeon(id);
+            int index = dungeon.PlayersInside.indexOf(uuid);
+            if (index != -1)
+            {
+                dungeon.PlayersInside.remove(index);
+
+                if (dungeon.PlayersInside.size() == 0)
+                {
+                    data.removeDungeon(id);
+                    dungeon.Destroy(event.getEntity().getServer(), false);
+                }
+                else
+                {
+                    data.putDungeon(id, dungeon);
+                }
+            }
+        }
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
@@ -88,8 +151,6 @@ public class DeepDelversMod
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             // Some client setup code
-            LOGGER.info("HELLO FROM CLIENT SETUP");
-            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
         }
     }
 }

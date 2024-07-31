@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "deep_delvers:bronze_ingot"
+    },
+    "D": {
+      "tag": "deep_delvers:deepslate"
+    },
+    "C": {
+      "item": "minecraft:emerald"
+    }
+  },
+  "pattern": [
+    "BDB",
+    "DCD",
+    "BDB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "deep_delvers:portal_catalyst",
+    "components": {
+      "deep_delvers:catalyst_tier": 0,
+      "deep_delvers:catalyst_depth": 0
+    }
+  }
+}

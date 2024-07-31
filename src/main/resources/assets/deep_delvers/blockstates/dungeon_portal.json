@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "deep_delvers:block/dungeon_portal_ns"
+    },
+    "axis=z": {
+      "model": "deep_delvers:block/dungeon_portal_ew"
+    }
+  }
+}

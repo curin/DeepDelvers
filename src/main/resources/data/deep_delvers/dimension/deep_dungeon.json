@@ -1,0 +1,13 @@
+{
+  "type": "deep_delvers:deep_dungeon",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "deep_delvers:dungeon",
+      "lakes": false,
+      "features": false,
+      "layers": [],
+      "structure_overrides": []
+    }
+  }
+}
