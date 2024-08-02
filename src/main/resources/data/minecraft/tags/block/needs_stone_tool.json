@@ -1,9 +1,9 @@
 {
   "values": [
-    "deep_delvers:tin_ore",
-    "deep_delvers:deepslate_tin_ore",
-    "deep_delvers:raw_tin_block",
-    "deep_delvers:tin_block",
-    "deep_delvers:bronze_block"
+    "deep_delvers:aluminum_ore",
+    "deep_delvers:deepslate_aluminum_ore",
+    "deep_delvers:raw_aluminum_block",
+    "deep_delvers:aluminum_block",
+    "deep_delvers:duralumin_block"
   ]
 }

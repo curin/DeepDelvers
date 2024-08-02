@@ -1,6 +1,7 @@
 package com.azure_drake.deep_delvers.blocks.entities;
 
 import com.azure_drake.deep_delvers.blocks.BlockManager;
+import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import com.azure_drake.deep_delvers.portal.PortalID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DungeonPortalTileEntity extends BlockEntity
 {
-    private PortalID PortalId = new PortalID(0, 0);
+    private PortalID PortalId = new PortalID(new DungeonID(0, 0), 0);
     public static final String ID_TAG = "portal_id";
 
     public DungeonPortalTileEntity(BlockPos pPos, BlockState pBlockState) {
@@ -55,7 +56,7 @@ public class DungeonPortalTileEntity extends BlockEntity
     {
         if (pTag.contains(ID_TAG))
         {
-            PortalId.deserializeNBT(pTag.getCompound(ID_TAG));
+            PortalId = PortalID.deserializeNbt(pTag.getCompound(ID_TAG));
         }
     }
     @Override

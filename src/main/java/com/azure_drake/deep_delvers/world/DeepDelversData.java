@@ -2,9 +2,12 @@ package com.azure_drake.deep_delvers.world;
 
 import com.azure_drake.deep_delvers.DeepDelversMod;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
+import com.azure_drake.deep_delvers.dungeon.DungeonID;
+import com.azure_drake.deep_delvers.dungeon.DungeonManager;
 import com.azure_drake.deep_delvers.portal.PortalID;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
@@ -15,54 +18,98 @@ import java.util.Set;
 public class DeepDelversData extends SavedData {
     public static final String Dungeon_Key ="Dungeons";
 
-    private Map<PortalID, DeepDungeon> PortalRegistry = new HashMap<>();
+    private Map<DungeonID, DeepDungeon> DungeonRegistry = new HashMap<>();
 
-    public DeepDungeon getDungeon(PortalID id)
+    public DeepDungeon getDungeon(DungeonID id)
     {
-        return PortalRegistry.get(id);
+        return DungeonRegistry.get(id);
     }
 
-    public boolean containsDungeon(PortalID id)
+    public boolean containsDungeon(DungeonID id)
     {
-        for (PortalID key: PortalRegistry.keySet())
+        return DungeonRegistry.containsKey(id);
+    }
+
+    public void putDungeon(DungeonID id, DeepDungeon dungeon)
+    {
+        DungeonRegistry.put(id, dungeon);
+        setDirty();
+    }
+
+    public void removePlayerFromDungeons(MinecraftServer server, String playerUUID)
+    {
+        boolean changed = false;
+        DungeonID[] keys = new DungeonID[DungeonRegistry.size()];
+        DungeonRegistry.keySet().toArray(keys);
+        for(DungeonID id : keys)
         {
-            if (id.equals(key))
+            DeepDungeon dungeon = DungeonRegistry.get(id);
+            int index = dungeon.PlayersInside.indexOf(playerUUID);
+            if (index != -1)
             {
-                return  true;
+                changed = true;
+                dungeon.PlayersInside.remove(index);
+
+                if (dungeon.PlayersInside.size() == 0 && id.Id != 0)
+                {
+                    DungeonRegistry.remove(id);
+                    dungeon.Destroy(server, false);
+                }
+                else
+                {
+                    DungeonRegistry.put(id, dungeon);
+                }
             }
         }
-        return false;
+
+        if (changed)
+        {
+            setDirty();
+        }
     }
 
-    public void putDungeon(PortalID id, DeepDungeon dungeon)
+    public boolean AttemptDestroyDungeon(MinecraftServer server, PortalID portalId)
     {
-        PortalRegistry.put(id, dungeon);
+        if (!DungeonRegistry.containsKey(portalId.DungeonId))
+        {
+            return true;
+        }
+
+        DeepDungeon dungeon = DungeonRegistry.get(portalId.DungeonId);
+
+        if (dungeon.PlayersInside.size() > 0)
+        {
+            return false;
+        }
+
+        DungeonRegistry.remove(portalId.DungeonId);
         setDirty();
+        dungeon.Destroy(server, false);
+        return true;
     }
 
-    public void removeDungeon(PortalID id)
+    public void DestroyPortal(MinecraftServer server, PortalID portal)
     {
-        PortalRegistry.remove(id);
-        setDirty();
+
     }
 
-    public Set<PortalID> getAllDungeonIds()
+    public Set<DungeonID> getAllDungeonIds()
     {
-        return  PortalRegistry.keySet();
+        return  DungeonRegistry.keySet();
     }
 
     @Override
     public CompoundTag save(CompoundTag pTag, HolderLookup.Provider pRegistries) {
         CompoundTag saveTag = new CompoundTag();
-        for (var portalId : PortalRegistry.keySet())
+        for (DungeonID dungeonID : DungeonRegistry.keySet())
         {
-            String TierString = String.valueOf(portalId.Tier);
+            String TierString = String.valueOf(dungeonID.Tier);
             if (!saveTag.contains(TierString))
                 saveTag.put(TierString, new CompoundTag());
 
-            DeepDungeon dungeon = PortalRegistry.get(portalId);
+            DeepDungeon dungeon = DungeonRegistry.get(dungeonID);
             CompoundTag tierTag = saveTag.getCompound(TierString);
-            tierTag.put(String.valueOf(portalId.Id), dungeon.saveToNbt());
+            tierTag.put(String.valueOf(dungeonID.Id), dungeon.saveToNbt());
         }
         CompoundTag mainTag = new CompoundTag();
         mainTag.put(Dungeon_Key, saveTag);
@@ -93,12 +140,25 @@ public class DeepDelversData extends SavedData {
 
             for (String id : tierTag.getAllKeys())
             {
-                PortalID portalId = new PortalID(Integer.parseInt(id), Integer.parseInt(tier));
-                data.PortalRegistry.put(portalId, DeepDungeon.readNbt(tierTag.getCompound(id)));
+                DungeonID dungeonID = new DungeonID(Integer.parseInt(id), Integer.parseInt(tier));
+                data.DungeonRegistry.put(dungeonID, DeepDungeon.readNbt(tierTag.getCompound(id)));
             }
         }
 
         return data;
+    }
+
+    public static DungeonID GetNextDungeonId(ServerLevel level, int tier)
+    {
+        DungeonID ret = new DungeonID(1, tier);
+
+        DeepDelversData deepData = DeepDelversData.get(level.getServer().getLevel(DungeonManager.DEEP_DUGEON));
+        while (deepData.containsDungeon(ret))
+        {
+            ret.Id++;
+        }
+
+        return ret;
     }
 
     public static DeepDelversData get(ServerLevel world) {

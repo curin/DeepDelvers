@@ -17,12 +17,12 @@ public class BlockManager {
     // Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(DeepDelversMod.MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, DeepDelversMod.MODID);
-    public static final DeferredBlock<Block> BRONZE_BLOCK = BLOCKS.registerSimpleBlock("bronze_block", BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK));
-    public static final DeferredBlock<Block> RAW_BRONZE_BLOCK = BLOCKS.registerSimpleBlock("raw_bronze_block", BlockBehaviour.Properties.ofFullCopy(Blocks.RAW_COPPER_BLOCK));
-    public static final DeferredBlock<Block> TIN_BLOCK = BLOCKS.registerSimpleBlock("tin_block", BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK));
-    public static final DeferredBlock<Block> TIN_ORE = BLOCKS.registerSimpleBlock("tin_ore", BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_ORE));
-    public static final DeferredBlock<Block> RAW_TIN_BLOCK = BLOCKS.registerSimpleBlock("raw_tin_block", BlockBehaviour.Properties.ofFullCopy(Blocks.RAW_COPPER_BLOCK));
-    public static final DeferredBlock<Block> DEEPSLATE_TIN_ORE = BLOCKS.registerSimpleBlock("deepslate_tin_ore", BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_COPPER_ORE));
+    public static final DeferredBlock<Block> DURALUMIN_BLOCK = BLOCKS.registerSimpleBlock("duralumin_block", BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK));
+    public static final DeferredBlock<Block> RAW_DURALUMIN_BLOCK = BLOCKS.registerSimpleBlock("raw_duralumin_block", BlockBehaviour.Properties.ofFullCopy(Blocks.RAW_COPPER_BLOCK));
+    public static final DeferredBlock<Block> ALUMINUM_BLOCK = BLOCKS.registerSimpleBlock("aluminum_block", BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_BLOCK));
+    public static final DeferredBlock<Block> ALUMINUM_ORE = BLOCKS.registerSimpleBlock("aluminum_ore", BlockBehaviour.Properties.ofFullCopy(Blocks.COPPER_ORE));
+    public static final DeferredBlock<Block> RAW_ALUMINUM_BLOCK = BLOCKS.registerSimpleBlock("raw_aluminum_block", BlockBehaviour.Properties.ofFullCopy(Blocks.RAW_COPPER_BLOCK));
+    public static final DeferredBlock<Block> DEEPSLATE_ALUMINUM_ORE = BLOCKS.registerSimpleBlock("deepslate_aluminum_ore", BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_COPPER_ORE));
 
     public static final DeferredBlock<Block> DEEP_ROCK = BLOCKS.registerSimpleBlock("deep_rock", BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
 

@@ -85,11 +85,10 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
 
         DungeonPortalTileEntity titleEntity = (DungeonPortalTileEntity)pLevel.getBlockEntity(pPos);
         DeepDelversData data =DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON));
-        DeepDungeon dungeon = data.getDungeon(titleEntity.getPortalId());
+        DeepDungeon dungeon = data.getDungeon(titleEntity.getPortalId().DungeonId);
 
-        if (dungeon != null)
+        if (dungeon != null && data.AttemptDestroyDungeon(pLevel.getServer(), titleEntity.getPortalId()))
         {
-            data.removeDungeon(titleEntity.getPortalId());
             dungeon.Destroy(pLevel.getServer(), true);
         }
     }

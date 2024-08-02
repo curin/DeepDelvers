@@ -1,9 +1,9 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "minecraft:craftin_shaped",
   "category": "misc",
   "key": {
     "B": {
-      "item": "deep_delvers:bronze_ingot"
+      "item": "deep_delvers:duralumin_ingot"
     },
     "D": {
       "tag": "deep_delvers:deepslate"

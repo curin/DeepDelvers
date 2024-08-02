@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "copper_ingot",
+  "ingredients": [
+    {
+      "item": "deep_delvers:aluminum_block"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "id": "deep_delvers:aluminum_ingot"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "com.azure_drake.deep_delvers.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "plugin": "com.azure_drake.deep_delvers.mixin.DeepDelversMixinConfigPlugin",
+  "mixins": [
+    "MixinMinecraftServer",
+    "MixinPlayerList"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

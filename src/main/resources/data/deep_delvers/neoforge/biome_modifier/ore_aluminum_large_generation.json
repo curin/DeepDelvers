@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#deep_delvers:aluminum_generates_in_large",
+  "features": "deep_delvers:ore_aluminum_large",
+  "step": "underground_ores"
+}

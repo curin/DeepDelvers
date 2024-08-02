@@ -1,11 +1,14 @@
 package com.azure_drake.deep_delvers.blocks;
 
-import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
+import com.azure_drake.deep_delvers.Config;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
+import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
 import com.azure_drake.deep_delvers.portal.DungeonPortal;
+import com.azure_drake.deep_delvers.portal.DungeonPortalShape;
+import com.azure_drake.deep_delvers.portal.PortalID;
+import com.azure_drake.deep_delvers.portal.PortalState;
 import com.azure_drake.deep_delvers.world.DeepDelversData;
-import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -13,6 +16,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.List;
+import java.util.Optional;
 
 public class DungeonPortalSpawner extends Block
 {
@@ -29,80 +35,66 @@ public class DungeonPortalSpawner extends Block
             return;
         }
 
-        Direction.Axis axis = Direction.Axis.X;
-        if (pLevel.getBlockState(pPos.offset(0,0,1)).is(BlockManager.DUNGEON_PORTAL) ||
-                pLevel.getBlockState(pPos.offset(0,0,1)).is(BlockManager.DUNGEON_PORTAL_SPAWNER) ||
-                pLevel.getBlockState(pPos.offset(0,0,-1)).is(BlockManager.DUNGEON_PORTAL) ||
-                pLevel.getBlockState(pPos.offset(0,0,-1)).is(BlockManager.DUNGEON_PORTAL_SPAWNER))
-        {
-            axis = Direction.Axis.Z;
-        }
-
-        BlockState blockstate = BlockManager.DUNGEON_PORTAL.get().defaultBlockState().setValue(DungeonPortalBlock.AXIS, axis);
-
-        pLevel.setBlock(pPos, blockstate, 18);
-        DungeonPortalTileEntity tile = (DungeonPortalTileEntity)pLevel.getBlockEntity(pPos);
-        tile.setPortalId(DungeonPortal.GetPortalId(pPos));
-
         DeepDelversData data = DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON));
-        DeepDungeon dungeon = data.getDungeon(tile.getPortalId());
+        DungeonID id = DungeonPortal.GetDungeonId(pPos);
+        DeepDungeon dungeon = data.getDungeon(id);
 
-        BlockPos offset = dungeon.Portal.DungeonBounds.minCorner.offset(-pPos.getX(), -pPos.getY(), -pPos.getZ());
-        if (dungeon.Portal.DungeonAxis == Direction.Axis.Y)
+        Optional<DungeonPortalShape> optional = DungeonPortalShape.findEmptyPortalShape(pLevel, pPos, Direction.Axis.X);
+
+        if (optional.isEmpty()) {
+            pLevel.destroyBlock(pPos, false);
+            return;
+        }
+
+        PortalID portalID = null;
+        List<DungeonPortal> portals = dungeon.Portals;
+        for (int i = 0, portalsSize = portals.size(); i < portalsSize; i++) {
+            DungeonPortal portal = portals.get(i);
+            if (portal.State == PortalState.Unconnected_To_Dungeon) {
+                portalID = new PortalID(id, i);
+                portal.DungeonBounds = optional.get().getRectangle();
+                portal.DungeonAxis = optional.get().getAxis();
+                portal.State = PortalState.Connected;
+
+                if (portal.DungeonLink.Id != -1)
+                {
+                    DeepDungeon dungeon2 = data.getDungeon(portal.DungeonLink.DungeonId);
+                    DungeonPortal portal2 = dungeon2.Portals.get(portal.DungeonLink.Id);
+                    portal2.LevelBounds = optional.get().getRectangle();
+                    portal2.LevelAxis = optional.get().getAxis();
+                    portal2.State = PortalState.Connected;
+                }
+
+                break;
+            }
+        }
+
+        if (portalID == null)
         {
-            if (dungeon.Portal.DungeonBounds.minCorner == DungeonPortal.GetDungeonRectFromId(tile.getPortalId()).minCorner) {
-                dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(pPos.offset(0, -1, 0), 3, 1);
-                data.putDungeon(tile.getPortalId(), dungeon);
-                return;
-            }
-
-            if (offset.getX() != 0 && offset.getZ() != 0)
+            if (pLevel.random.nextInt(100) < Config.InDungeonNexusChance)
             {
-                pLevel.destroyBlock(pPos, false);
+                //TODO: Spawn Nexus or Connect to Nexus
             }
+            else {
+                int depth = dungeon.Depth + (pLevel.random.nextInt(100) > 75 ? 1 : 0);
+                int tier = id.Tier;
+                if (depth > 4) {
+                    depth = 0;
+                    tier++;
+                }
+                PortalID connected = optional.get().createPortalBlocks(tier, depth);
 
-            if (offset.getX() != 0)
-            {
-                dungeon.Portal.DungeonAxis = Direction.Axis.X;
-                dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(dungeon.Portal.DungeonBounds.minCorner.offset(-1, 0, 0), dungeon.Portal.DungeonBounds.axis1Size, dungeon.Portal.DungeonBounds.axis2Size + 2);
-            }
+                PortalID myPortal = dungeon.CreateNewPortalInside(pLevel, optional.get().getRectangle(), optional.get().getAxis(), connected);
 
-            if (offset.getZ() != 0)
-            {
-                dungeon.Portal.DungeonAxis = Direction.Axis.X;
-                dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(dungeon.Portal.DungeonBounds.minCorner.offset(0, 0, -1), dungeon.Portal.DungeonBounds.axis1Size, dungeon.Portal.DungeonBounds.axis2Size + 2);
+                DeepDungeon dungeon2 = data.getDungeon(connected.DungeonId);
+                dungeon2.Portals.get(connected.Id).DungeonLink = myPortal;
             }
-        }
-
-        offset = dungeon.Portal.DungeonBounds.minCorner.offset(-pPos.getX(), -pPos.getY(), -pPos.getZ());
-        if (dungeon.Portal.DungeonAxis == Direction.Axis.X) {
-            if (offset.getX() < 0) {
-                dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(pPos.offset(-1, 0, 0), dungeon.Portal.DungeonBounds.axis1Size, dungeon.Portal.DungeonBounds.axis2Size + offset.getX() + 1);
-            }
-            else
-            {
-                dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(dungeon.Portal.DungeonBounds.minCorner, dungeon.Portal.DungeonBounds.axis1Size, dungeon.Portal.DungeonBounds.axis2Size + offset.getX());
-            }
-        }
-
-        if (dungeon.Portal.DungeonAxis == Direction.Axis.Z) {
-            if (offset.getZ() < 0) {
-                dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(pPos.offset(0, 0, -1), dungeon.Portal.DungeonBounds.axis1Size, dungeon.Portal.DungeonBounds.axis2Size + offset.getZ() + 1);
-            }
-            else
-            {
-                dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(dungeon.Portal.DungeonBounds.minCorner, dungeon.Portal.DungeonBounds.axis1Size, dungeon.Portal.DungeonBounds.axis2Size + offset.getZ());
-            }
-        }
-
-        if (offset.getY() < 0) {
-            dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(pPos.offset(0, -1, 0), dungeon.Portal.DungeonBounds.axis1Size + offset.getY() + 1, dungeon.Portal.DungeonBounds.axis2Size);
         }
         else
         {
-            dungeon.Portal.DungeonBounds = new BlockUtil.FoundRectangle(dungeon.Portal.DungeonBounds.minCorner, dungeon.Portal.DungeonBounds.axis1Size + offset.getY(), dungeon.Portal.DungeonBounds.axis2Size);
+            optional.get().createPortalBlocks(portalID);
         }
 
-        data.putDungeon(tile.getPortalId(), dungeon);
+        data.putDungeon(id, dungeon);
     }
 }

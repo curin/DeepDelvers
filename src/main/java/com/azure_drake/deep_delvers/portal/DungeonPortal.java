@@ -1,9 +1,8 @@
 package com.azure_drake.deep_delvers.portal;
 
-import com.azure_drake.deep_delvers.DeepDelversMod;
 import com.azure_drake.deep_delvers.blocks.DeepBlockTags;
-import com.azure_drake.deep_delvers.blocks.DungeonPortalBlock;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
+import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
 import com.azure_drake.deep_delvers.world.DeepDelversData;
 import net.minecraft.BlockUtil;
@@ -40,6 +39,18 @@ public class DungeonPortal
         LevelAxis = levelAxis;
         DungeonBounds = dungeonBounds;
         DungeonAxis = dungeonAxis;
+        DungeonLink = new PortalID(new DungeonID(-1, -1), -1);
+    }
+
+    public DungeonPortal(ResourceKey<Level> level, BlockUtil.FoundRectangle levelBounds, Direction.Axis levelAxis,
+                         BlockUtil.FoundRectangle dungeonBounds, Direction.Axis dungeonAxis, PortalID dungeonLink)
+    {
+        Level = level;
+        LevelBounds = levelBounds;
+        LevelAxis = levelAxis;
+        DungeonBounds = dungeonBounds;
+        DungeonAxis = dungeonAxis;
+        DungeonLink = dungeonLink;
     }
 
     public ResourceKey<Level> Level;
@@ -47,20 +58,17 @@ public class DungeonPortal
     public Direction.Axis LevelAxis;
     public BlockUtil.FoundRectangle DungeonBounds;
     public Direction.Axis DungeonAxis;
-    public static PortalID CreateNewPortal(int tier, int depth, ServerLevel level, BlockUtil.FoundRectangle levelBounds, Direction.Axis levelAxis)
-    {
-        PortalID portalId = GetNextPortalId(level, tier);
-        DungeonPortal portal = new DungeonPortal(level.dimension(), levelBounds, levelAxis, GetDungeonRectFromId(portalId), Direction.Axis.Y);
-        DeepDelversData.get(level.getServer().getLevel(DungeonManager.DEEP_DUGEON)).putDungeon(portalId, new DeepDungeon(depth, portal));
-
-        //build portal in dungeon here
-        DungeonManager.SpawnNewDungeon(level.getServer(), portalId, portal);
-
-        return portalId;
-    }
+    public PortalID DungeonLink;
+    public PortalState State = PortalState.Unconnected_To_Dungeon;
+    public boolean Tethered = false;
 
     public void Destroy(MinecraftServer server)
     {
+        if (State == PortalState.Destroyed)
+        {
+            return;
+        }
+        State = PortalState.Destroyed;
         ServerLevel level = server.getLevel(Level);
         Direction rightDir = LevelAxis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
         BlockPos.betweenClosed(LevelBounds.minCorner, LevelBounds.minCorner.relative(Direction.UP, LevelBounds.axis1Size - 1).relative(rightDir, LevelBounds.axis2Size - 1))
@@ -76,37 +84,30 @@ public class DungeonPortal
                 {
                     deeplevel.destroyBlock(p_77725_, false);
                 });
+
+        if (DungeonLink.Id != -1)
+        {
+            DeepDelversData data = DeepDelversData.get(server.getLevel(DungeonManager.DEEP_DUGEON));
+            data.DestroyPortal(server, DungeonLink);
+        }
     }
 
     private static final int DungeonDistance = 10000;
-    private static final int DungeonMaxIDX = 1000000000 / 10000;
+    private static final int DungeonMaxIDX = 15000000 / 10000;
 
-    public static PortalID GetPortalId(BlockPos pPos)
+    public static DungeonID GetDungeonId(BlockPos pPos)
     {
-        return new PortalID(((5000 + pPos.getX()) / DungeonDistance) + ((5000 + pPos.getZ()) / DungeonDistance * DungeonMaxIDX), 4 - ((pPos.getY() + 415) / 75));
+        return new DungeonID(((5000 + pPos.getX()) / DungeonDistance) + ((5000 + pPos.getZ()) / DungeonDistance * DungeonMaxIDX), 4 - ((pPos.getY() + 415) / 75));
     }
 
     public static BlockUtil.FoundRectangle GetDungeonRectFromId(PortalID id)
     {
-        return new BlockUtil.FoundRectangle(new BlockPos((id.Id % DungeonMaxIDX) * DungeonDistance, -415 + ((4 - id.Tier) * 75),(id.Id / DungeonDistance) * DungeonDistance), 3, 3);
-    }
-
-    private static PortalID GetNextPortalId(ServerLevel level, int tier)
-    {
-        PortalID ret = new PortalID(1, tier);
-
-        DeepDelversData deepData = DeepDelversData.get(level.getServer().getLevel(DungeonManager.DEEP_DUGEON));
-        while (deepData.containsDungeon(ret))
-        {
-            ret.Id++;
-        }
-
-        return ret;
+        return new BlockUtil.FoundRectangle(new BlockPos((id.DungeonId.Id % DungeonMaxIDX) * DungeonDistance, -415 + ((4 - id.DungeonId.Tier) * 75),(id.DungeonId.Id / DungeonDistance) * DungeonDistance), 3, 3);
     }
 
     public static DimensionTransition GetTransition(PortalID portalId, ServerLevel pLevel, Entity pEntity, BlockPos pPos)
     {
-        DeepDungeon dungeonData = DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON)).getDungeon(portalId);
+        DeepDungeon dungeonData = DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON)).getDungeon(portalId.DungeonId);
 
         if (dungeonData == null)
         {
@@ -124,33 +125,47 @@ public class DungeonPortal
             }
         }
 
-        if (pLevel.dimension() == DungeonManager.DEEP_DUGEON && IsInPortal(pPos, dungeonData.Portal.DungeonBounds, new Vec3(1, 0, 0)))
+        DungeonPortal portal = dungeonData.Portals.get(portalId.Id);
+        if (pLevel.dimension() == DungeonManager.DEEP_DUGEON && IsInPortal(pPos, portal.DungeonBounds, new Vec3(1, 0, 0)))
         {
             return getDimensionTransitionFromExit(pEntity, pPos,
-                    dungeonData.Portal.LevelBounds, pLevel.getServer().getLevel(dungeonData.Portal.Level),
+                    portal.LevelBounds, pLevel.getServer().getLevel(portal.Level),
                     DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET));
         }
 
         return getDimensionTransitionFromExit(pEntity, pPos,
-                dungeonData.Portal.DungeonBounds, pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON),
+                portal.DungeonBounds, pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON),
                 DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET));
     }
 
     public static void BeginTeleport(PortalID portalId, Level pLevel, BlockPos pPos, Entity pEntity, Portal portal)
     {
-        if (!pEntity.canUsePortal(false) || pLevel.getServer() == null)
+        if (!pEntity.canUsePortal(false) || pLevel.getServer() == null || pLevel.isClientSide)
         {
             return;
         }
 
         DeepDelversData data = DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON));
-        DeepDungeon dungeonData = data.getDungeon(portalId);
 
-        if (dungeonData == null || dungeonData.Portal.Level != DungeonManager.DEEP_DUGEON)
+        if (!data.containsDungeon(portalId.DungeonId))
+        {
+            pLevel.destroyBlock(pPos, false);
+        }
+
+        DeepDungeon dungeonData = data.getDungeon(portalId.DungeonId);
+
+        if (dungeonData.Portals.size() <= portalId.Id)
+        {
+            pLevel.destroyBlock(pPos, false);
+        }
+
+        DungeonPortal dungeonPortal = dungeonData.Portals.get(portalId.Id);
+
+        if (dungeonData == null || dungeonPortal.Level != DungeonManager.DEEP_DUGEON)
         {
             if (pLevel.dimension() != DungeonManager.DEEP_DUGEON && pEntity instanceof Player player && dungeonData != null && !dungeonData.PlayersInside.contains(player.getStringUUID())) {
                 dungeonData.PlayersInside.add(player.getStringUUID());
-                data.putDungeon(portalId, dungeonData);
+                data.putDungeon(portalId.DungeonId, dungeonData);
             }
             if (portal != null && pEntity.canUsePortal(false)) {
                 pEntity.setAsInsidePortal(portal, pPos);
@@ -165,39 +180,42 @@ public class DungeonPortal
         BlockPos origin, target;
         float scaleHoriz, scaleVert;
 
-        if (dungeonData.Portal.Level == pLevel.dimension() && dungeonData.Portal.WithinLevel(pPos))
+        if (dungeonPortal.Level == pLevel.dimension() && dungeonPortal.WithinLevel(pPos))
         {
-            if (pEntity instanceof Player player && !dungeonData.PlayersInside.contains(player.getStringUUID())) {
-                dungeonData.PlayersInside.add(player.getStringUUID());
-                data.putDungeon(portalId, dungeonData);
+            if (pEntity instanceof Player player) {
+                if (!dungeonData.PlayersInside.contains(player.getStringUUID()))
+                {
+                    dungeonData.PlayersInside.add(player.getStringUUID());
+                    data.putDungeon(portalId.DungeonId, dungeonData);
+                }
+
+                if (dungeonPortal.DungeonLink.Id != -1 && dungeonPortal.DungeonLink.DungeonId.Id > 0)
+                {
+                    DeepDungeon dungeon2 = data.getDungeon(dungeonPortal.DungeonLink.DungeonId);
+                    if (!dungeon2.PlayersInside.contains(player.getStringUUID())) {
+                        dungeon2.PlayersInside.add(player.getStringUUID());
+                        data.putDungeon(portalId.DungeonId, dungeonData);
+                    }
+                }
             }
-            origin = dungeonData.Portal.LevelBounds.minCorner;
-            target = dungeonData.Portal.DungeonBounds.minCorner;
-            scaleVert = (float)dungeonData.Portal.DungeonBounds.axis1Size / dungeonData.Portal.LevelBounds.axis1Size;
-            scaleHoriz = (float)dungeonData.Portal.DungeonBounds.axis2Size / dungeonData.Portal.LevelBounds.axis2Size;
+            origin = dungeonPortal.LevelBounds.minCorner;
+            target = dungeonPortal.DungeonBounds.minCorner;
+            scaleVert = (float)dungeonPortal.DungeonBounds.axis1Size / dungeonPortal.LevelBounds.axis1Size;
+            scaleHoriz = (float)dungeonPortal.DungeonBounds.axis2Size / dungeonPortal.LevelBounds.axis2Size;
         }
         else
         {
-            if (pEntity instanceof Player player && dungeonData.PlayersInside.contains(player.getStringUUID())) {
-                dungeonData.PlayersInside.remove(player.getStringUUID());
-
-                if (dungeonData.PlayersInside.size() == 0)
-                {
-                    data.removeDungeon(portalId);
-                    dungeonData.Destroy(pLevel.getServer(), false);
-                }
-                else
-                {
-                    data.putDungeon(portalId, dungeonData);
-                }
+            if (pEntity instanceof Player player && dungeonData.PlayersInside.contains(player.getStringUUID()) && dungeonPortal.DungeonLink.Id == -1)
+            {
+                data.removePlayerFromDungeons(pLevel.getServer(), player.getStringUUID());
             }
-            origin = dungeonData.Portal.DungeonBounds.minCorner;
-            target = dungeonData.Portal.LevelBounds.minCorner;
-            scaleVert = (float)dungeonData.Portal.LevelBounds.axis1Size / dungeonData.Portal.DungeonBounds.axis1Size;
-            scaleHoriz = (float)dungeonData.Portal.LevelBounds.axis2Size / dungeonData.Portal.DungeonBounds.axis2Size;
+            origin = dungeonPortal.DungeonBounds.minCorner;
+            target = dungeonPortal.LevelBounds.minCorner;
+            scaleVert = (float)dungeonPortal.LevelBounds.axis1Size / dungeonPortal.DungeonBounds.axis1Size;
+            scaleHoriz = (float)dungeonPortal.LevelBounds.axis2Size / dungeonPortal.DungeonBounds.axis2Size;
         }
 
-        if (dungeonData.Portal.LevelAxis == dungeonData.Portal.DungeonAxis) {
+        if (dungeonPortal.LevelAxis == dungeonPortal.DungeonAxis) {
             pEntity.teleportTo((pEntity.getX() - origin.getX()) * scaleHoriz + target.getX(),
                     (pEntity.getY() - origin.getY()) * scaleVert + target.getY(),
                     (pEntity.getZ() - origin.getZ()) * scaleHoriz + target.getZ());
@@ -293,6 +311,7 @@ public class DungeonPortal
     public static final String DungeonBoundsAxis1 = "DungeonBounds.Axis1";
     public static final String DungeonBoundsAxis2 = "DungeonBounds.Axis2";
     public static final String DungeonAxis_Key = "LevelAxis";
+    public static final String Tethered_Key = "Tethered";
 
     public CompoundTag saveToNbt()
     {
@@ -302,7 +321,7 @@ public class DungeonPortal
         tag.putInt(LevelBoundsMinZ, LevelBounds.minCorner.getZ());
         tag.putInt(LevelBoundsAxis1, LevelBounds.axis1Size);
         tag.putInt(LevelBoundsAxis2, LevelBounds.axis2Size);
-        tag.putString(Level_Key ,Level.toString());
+        tag.putString(Level_Key ,Level.location().toString());
         tag.putInt(LevelAxis_Key, LevelAxis.ordinal());
         tag.putInt(DungeonBoundsMinX, DungeonBounds.minCorner.getX());
         tag.putInt(DungeonBoundsMinY, DungeonBounds.minCorner.getY());
@@ -310,6 +329,7 @@ public class DungeonPortal
         tag.putInt(DungeonBoundsAxis1, DungeonBounds.axis1Size);
         tag.putInt(DungeonBoundsAxis2, DungeonBounds.axis2Size);
         tag.putInt(DungeonAxis_Key, DungeonAxis.ordinal());
+        tag.putBoolean(Tethered_Key, Tethered);
         return tag;
     }
 
@@ -317,10 +337,12 @@ public class DungeonPortal
     {
         String level = tag.getString(Level_Key);
         int index = level.indexOf(':');
-        return new DungeonPortal(ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(level.substring(0,index - 1), level.substring(index + 1))),
+        DungeonPortal portal = new DungeonPortal(ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(level.substring(0,index - 1), level.substring(index + 1))),
                 new BlockUtil.FoundRectangle(new BlockPos(tag.getInt(LevelBoundsMinX), tag.getInt(LevelBoundsMinY), tag.getInt(LevelBoundsMinZ)),
                         tag.getInt(LevelBoundsAxis1), tag.getInt(LevelBoundsAxis2)), Direction.Axis.values()[tag.getInt(LevelAxis_Key)],
                 new BlockUtil.FoundRectangle(new BlockPos(tag.getInt(DungeonBoundsMinX), tag.getInt(DungeonBoundsMinY), tag.getInt(DungeonBoundsMinZ)),
                         tag.getInt(DungeonBoundsAxis1), tag.getInt(DungeonBoundsAxis2)), Direction.Axis.values()[tag.getInt(DungeonAxis_Key)]);
+        portal.Tethered = tag.getBoolean(Tethered_Key);
+        return portal;
     }
 }

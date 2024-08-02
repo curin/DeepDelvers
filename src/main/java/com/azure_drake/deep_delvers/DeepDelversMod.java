@@ -3,11 +3,13 @@ package com.azure_drake.deep_delvers;
 import com.azure_drake.deep_delvers.blocks.BlockManager;
 import com.azure_drake.deep_delvers.creativetab.CreativeTabManager;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
+import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
 import com.azure_drake.deep_delvers.items.ItemManager;
 import com.azure_drake.deep_delvers.portal.PortalID;
 import com.azure_drake.deep_delvers.world.DeepDelversData;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.border.WorldBorder;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -84,32 +86,14 @@ public class DeepDelversMod
     public void onLivingDeath(LivingDeathEvent event)
     {
         if (event.getEntity().level().isClientSide || event.getEntity().getServer() == null ||
-                !(event.getEntity() instanceof Player player && player.level().dimension() == DungeonManager.DEEP_DUGEON))
+                !(event.getEntity() instanceof Player player) || player.level().dimension() != DungeonManager.DEEP_DUGEON)
         {
             return;
         }
 
         DeepDelversData data = DeepDelversData.get(player.getServer().getLevel(DungeonManager.DEEP_DUGEON));
         String uuid = player.getStringUUID();
-        for(PortalID id : data.getAllDungeonIds())
-        {
-            DeepDungeon dungeon = data.getDungeon(id);
-            int index = dungeon.PlayersInside.indexOf(uuid);
-            if (index != -1)
-            {
-                dungeon.PlayersInside.remove(index);
-
-                if (dungeon.PlayersInside.size() == 0)
-                {
-                    data.removeDungeon(id);
-                    dungeon.Destroy(player.getServer(), false);
-                }
-                else
-                {
-                    data.putDungeon(id, dungeon);
-                }
-            }
-        }
+        data.removePlayerFromDungeons(player.getServer(), uuid);
     }
 
     @SubscribeEvent
@@ -122,25 +106,7 @@ public class DeepDelversMod
 
         DeepDelversData data = DeepDelversData.get(event.getEntity().getServer().getLevel(DungeonManager.DEEP_DUGEON));
         String uuid = event.getEntity().getStringUUID();
-        for(PortalID id : data.getAllDungeonIds())
-        {
-            DeepDungeon dungeon = data.getDungeon(id);
-            int index = dungeon.PlayersInside.indexOf(uuid);
-            if (index != -1)
-            {
-                dungeon.PlayersInside.remove(index);
-
-                if (dungeon.PlayersInside.size() == 0)
-                {
-                    data.removeDungeon(id);
-                    dungeon.Destroy(event.getEntity().getServer(), false);
-                }
-                else
-                {
-                    data.putDungeon(id, dungeon);
-                }
-            }
-        }
+        data.removePlayerFromDungeons(event.getEntity().getServer(), uuid);
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:raw_copper_block"
+    },
+    {
+      "item": "minecraft:raw_copper_block"
+    },
+    {
+      "item": "minecraft:raw_copper_block"
+    },
+    {
+      "item": "deep_delvers:raw_aluminum_block"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "id": "deep_delvers:raw_duralumin_block"
+  }
+}

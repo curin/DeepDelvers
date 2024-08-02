@@ -3,19 +3,17 @@ package com.azure_drake.deep_delvers.portal;
 import com.azure_drake.deep_delvers.blocks.BlockManager;
 import com.azure_drake.deep_delvers.blocks.DungeonPortalBlock;
 import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
+import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
+import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -162,28 +160,44 @@ public class DungeonPortalShape
     }
 
     private static boolean isEmpty(BlockState pState) {
-        return pState.isAir() || pState.is(BlockTags.FIRE) || pState.is(BlockManager.DUNGEON_PORTAL.get());
+        return pState.isAir() || pState.is(BlockTags.FIRE) || pState.is(BlockManager.DUNGEON_PORTAL.get()) || pState.is(BlockManager.DUNGEON_PORTAL_SPAWNER.get());
     }
 
     public boolean isValid() {
         return this.bottomLeft != null && this.width >= 2 && this.width <= 21 && this.height >= 3 && this.height <= 21;
     }
 
-    public void createPortalBlocks(int tier, int depth) {
+    public PortalID createPortalBlocks(int tier, int depth) {
         if (level.getServer() == null)
         {
-            return;
+            return new PortalID(new DungeonID(-1, -1), -1);
         }
 
-        PortalID portalID = DungeonPortal.CreateNewPortal(tier, depth, level.getServer().getLevel(level.dimension()), new BlockUtil.FoundRectangle(bottomLeft, height - 1, width - 1), rightDir.getAxis());
+        PortalID portalID = DeepDungeon.CreateNewDungeon(tier, depth, level.getServer().getLevel(level.dimension()), getRectangle(), getAxis());
 
+        createPortalBlocks(portalID);
+        return portalID;
+    }
+
+    public BlockUtil.FoundRectangle getRectangle()
+    {
+        return new BlockUtil.FoundRectangle(bottomLeft, height - 1, width - 1);
+    }
+
+    public Direction.Axis getAxis()
+    {
+        return rightDir.getAxis();
+    }
+
+    public void createPortalBlocks(PortalID id)
+    {
         BlockState blockstate = BlockManager.DUNGEON_PORTAL.get().defaultBlockState().setValue(DungeonPortalBlock.AXIS, this.axis);
         BlockPos.betweenClosed(this.bottomLeft, this.bottomLeft.relative(Direction.UP, this.height - 1).relative(this.rightDir, this.width - 1))
                 .forEach(p_77725_ ->
                 {
                     this.level.setBlock(p_77725_, blockstate, 18);
                     DungeonPortalTileEntity tile = (DungeonPortalTileEntity)this.level.getBlockEntity(p_77725_);
-                    tile.setPortalId(portalID);
+                    tile.setPortalId(id);
                 });
     }
 

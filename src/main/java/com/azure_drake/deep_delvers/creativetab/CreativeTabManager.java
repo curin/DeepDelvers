@@ -17,7 +17,7 @@ public class CreativeTabManager {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN_TAB = CREATIVE_MODE_TABS.register("deep_delvers_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.deep_delvers")) //The language key for the title of your CreativeModeTab
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> ItemManager.BRONZE_INGOT.get().getDefaultInstance())
+            .icon(() -> ItemManager.PORTAL_CATALYST.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 ItemManager.addToCreativeTab(output);
             }).build());

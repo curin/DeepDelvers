@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:craftin_shapeless",
+  "category": "misc",
+  "group": "copper_ingot",
+  "ingredients": [
+    {
+      "item": "deep_delvers:duralumin_block"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "id": "deep_delvers:duralumin_ingot"
+  }
+}

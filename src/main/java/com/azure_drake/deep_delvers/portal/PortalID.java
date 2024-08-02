@@ -1,30 +1,30 @@
 package com.azure_drake.deep_delvers.portal;
 
+import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 
 public class PortalID
 {
-    public PortalID(int id, int tier)
+    public PortalID(DungeonID dungeonId, int id)
     {
+        DungeonId = dungeonId;
         Id = id;
     }
 
+    public DungeonID DungeonId;
     public int Id;
-    public int Tier;
     public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
+        tag.put("Dungeon", DungeonId.serializeNBT());
         tag.putInt("Id", Id);
-        tag.putInt("Tier", Tier);
 
         return tag;
     }
 
-    public void deserializeNBT(CompoundTag tag)
+    public static PortalID deserializeNbt(CompoundTag tag)
     {
-        Id = tag.getInt("Id");
-        Tier = tag.getInt("Tier");
+        return new PortalID(DungeonID.deserializeNbt(tag.getCompound("Dungeon")), tag.getInt("Id"));
     }
 
     @Override
@@ -34,6 +34,6 @@ public class PortalID
             return false;
         }
 
-        return id.Id == Id && id.Tier == Tier;
+        return id.DungeonId == DungeonId && id.Id == Id;
     }
 }
