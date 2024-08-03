@@ -4,7 +4,6 @@ import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
 import com.azure_drake.deep_delvers.portal.DungeonPortal;
-import com.azure_drake.deep_delvers.portal.PortalID;
 import com.azure_drake.deep_delvers.world.DeepDelversData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,14 +15,16 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.*;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -87,9 +88,9 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
         DeepDelversData data =DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON));
         DeepDungeon dungeon = data.getDungeon(titleEntity.getPortalId().DungeonId);
 
-        if (dungeon != null && data.AttemptDestroyDungeon(pLevel.getServer(), titleEntity.getPortalId()))
+        if (dungeon != null)
         {
-            dungeon.Destroy(pLevel.getServer(), true);
+            data.AttemptDestroyDungeon(pLevel.getServer(), titleEntity.getPortalId());
         }
     }
 
@@ -122,7 +123,7 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
                     (double)pPos.getZ() + 0.5,
                     SoundEvents.PORTAL_AMBIENT,
                     SoundSource.BLOCKS,
-                    0.5F,
+                    0.1F,
                     pRandom.nextFloat() * 0.4F + 0.8F,
                     false
             );

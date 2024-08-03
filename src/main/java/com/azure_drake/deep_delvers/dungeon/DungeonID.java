@@ -1,9 +1,6 @@
 package com.azure_drake.deep_delvers.dungeon;
 
-import com.azure_drake.deep_delvers.portal.PortalID;
 import net.minecraft.nbt.CompoundTag;
-
-import java.util.Objects;
 
 public class DungeonID
 {

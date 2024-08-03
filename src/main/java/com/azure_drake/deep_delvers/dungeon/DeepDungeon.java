@@ -11,9 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DeepDungeon
 {
@@ -59,19 +57,15 @@ public class DeepDungeon
 
     public boolean Destroy(MinecraftServer server, PortalID portalId, boolean ignoreTethered)
     {
-        if (!Tethered() || ignoreTethered)
+        if (PlayersInside.size() > 0 && portalId.Id != 0)
         {
-            Destroy(server, ignoreTethered);
-            return true;
+            return false;
         }
 
-        if (Portals.size() > portalId.Id)
-        {
-            DungeonPortal portal = Portals.get(portalId.Id);
-            portal.Destroy(server);
-        }
+        DungeonPortal portal = Portals.get(portalId.Id);
+        portal.Destroy(server);
 
-        return Portals.size() > 0;
+        return Tethered() && !ignoreTethered && Portals.size() > 0;
     }
 
     public CompoundTag saveToNbt()

@@ -29,6 +29,9 @@ public class BlockManager {
     public static final DeferredBlock<DungeonPortalBlock> DUNGEON_PORTAL = BLOCKS.register("dungeon_portal", DungeonPortalBlock::new);
 
     public static final DeferredBlock<DungeonPortalSpawner> DUNGEON_PORTAL_SPAWNER = BLOCKS.register("dungeon_portal_spawner", DungeonPortalSpawner::new);
+
+    public static final DeferredBlock<DungeonPortalFrame> DUNGEON_PORTAL_FRAME = BLOCKS.register("dungeon_portal_frame", DungeonPortalFrame::Standard);
+    public static final DeferredBlock<DungeonPortalFrame> DUNGEON_PORTAL_FRAME_COSMETIC = BLOCKS.register("dungeon_portal_frame_cosmetic", DungeonPortalFrame::Cosmetic);
     public static final Supplier<BlockEntityType<DungeonPortalTileEntity>> DUNGEON_PORTAL_ENTITY = BLOCK_ENTITIES.register("dungeon_portal",
             () -> BlockEntityType.Builder.of(DungeonPortalTileEntity::new, DUNGEON_PORTAL.get()).build(null));
 

@@ -68,29 +68,41 @@ public class DeepDelversData extends SavedData {
         }
     }
 
-    public boolean AttemptDestroyDungeon(MinecraftServer server, PortalID portalId)
+    public void AttemptDestroyDungeon(MinecraftServer server, PortalID portalId)
     {
         if (!DungeonRegistry.containsKey(portalId.DungeonId))
         {
-            return true;
+            return;
         }
 
         DeepDungeon dungeon = DungeonRegistry.get(portalId.DungeonId);
 
         if (dungeon.PlayersInside.size() > 0)
         {
-            return false;
+            DestroyPortal(server, portalId);
+            return;
         }
 
         DungeonRegistry.remove(portalId.DungeonId);
         setDirty();
         dungeon.Destroy(server, false);
-        return true;
     }
 
-    public void DestroyPortal(MinecraftServer server, PortalID portal)
+    public void DestroyPortal(MinecraftServer server, PortalID portalId)
     {
+        if (!DungeonRegistry.containsKey(portalId.DungeonId))
+        {
+            return;
+        }
 
+        DeepDungeon dungeon = DungeonRegistry.get(portalId.DungeonId);
+
+        if (dungeon.Destroy(server, portalId, false))
+        {
+            DungeonRegistry.remove(portalId.DungeonId);
+            dungeon.Destroy(server, false);
+        }
+        setDirty();
     }
 
     public Set<DungeonID> getAllDungeonIds()

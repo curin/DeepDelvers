@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "deep_delvers:block/dungeon_portal_frame_top",
+    "side": "deep_delvers:block/dungeon_portal_frame_middle"
+  }
+}

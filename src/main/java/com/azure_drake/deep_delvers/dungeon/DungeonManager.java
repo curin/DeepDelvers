@@ -3,7 +3,6 @@ package com.azure_drake.deep_delvers.dungeon;
 import com.azure_drake.deep_delvers.DeepDelversMod;
 import com.azure_drake.deep_delvers.portal.DungeonPortal;
 import com.azure_drake.deep_delvers.portal.PortalID;
-import net.minecraft.BlockUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;

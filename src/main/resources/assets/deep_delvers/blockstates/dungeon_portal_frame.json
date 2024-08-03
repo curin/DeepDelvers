@@ -1,0 +1,105 @@
+{
+  "variants": {
+    "connected_state=single,facing=east": {
+      "model": "deep_delvers:block/dungeon_portal_frame_single"
+    },
+    "connected_state=single,facing=west": {
+      "model": "deep_delvers:block/dungeon_portal_frame_single"
+    },
+
+    "connected_state=single,facing=up": {
+      "model": "deep_delvers:block/dungeon_portal_frame_single"
+    },
+    "connected_state=single,facing=down": {
+      "model": "deep_delvers:block/dungeon_portal_frame_single"
+    },
+
+    "connected_state=single,facing=north": {
+      "model": "deep_delvers:block/dungeon_portal_frame_single"
+    },
+    "connected_state=single,facing=south": {
+      "model": "deep_delvers:block/dungeon_portal_frame_single"
+    },
+
+    "connected_state=middle,facing=east": {
+      "model": "deep_delvers:block/dungeon_portal_frame_middle_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "connected_state=middle,facing=west": {
+      "model": "deep_delvers:block/dungeon_portal_frame_middle_horizontal",
+      "x": 90,
+      "y": 90
+    },
+
+    "connected_state=middle,facing=up": {
+      "model": "deep_delvers:block/dungeon_portal_frame_middle"
+    },
+    "connected_state=middle,facing=down": {
+      "model": "deep_delvers:block/dungeon_portal_frame_middle"
+    },
+
+    "connected_state=middle,facing=north": {
+      "model": "deep_delvers:block/dungeon_portal_frame_middle_horizontal",
+      "x": 90
+    },
+    "connected_state=middle,facing=south": {
+      "model": "deep_delvers:block/dungeon_portal_frame_middle_horizontal",
+      "x": 90
+    },
+
+    "connected_state=edge,facing=east": {
+      "model": "deep_delvers:block/dungeon_portal_frame_edge_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "connected_state=edge,facing=west": {
+      "model": "deep_delvers:block/dungeon_portal_frame_edge_horizontal",
+      "x": 90,
+      "y": 90
+    },
+
+    "connected_state=edge,facing=up": {
+      "model": "deep_delvers:block/dungeon_portal_frame_edge"
+    },
+    "connected_state=edge,facing=down": {
+      "model": "deep_delvers:block/dungeon_portal_frame_edge"
+    },
+
+    "connected_state=edge,facing=north": {
+      "model": "deep_delvers:block/dungeon_portal_frame_edge_horizontal",
+      "x": 90
+    },
+    "connected_state=edge,facing=south": {
+      "model": "deep_delvers:block/dungeon_portal_frame_edge_horizontal",
+      "x": 90
+    },
+
+    "connected_state=cap,facing=east": {
+      "model": "deep_delvers:block/dungeon_portal_frame_cap_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "connected_state=cap,facing=west": {
+      "model": "deep_delvers:block/dungeon_portal_frame_cap_horizontal",
+      "x": 90,
+      "y": -90
+    },
+
+    "connected_state=cap,facing=up": {
+      "model": "deep_delvers:block/dungeon_portal_frame_cap"
+    },
+    "connected_state=cap,facing=down": {
+      "model": "deep_delvers:block/dungeon_portal_frame_cap"
+    },
+
+    "connected_state=cap,facing=north": {
+      "model": "deep_delvers:block/dungeon_portal_frame_cap_horizontal",
+      "x": 90
+    },
+    "connected_state=cap,facing=south": {
+      "model": "deep_delvers:block/dungeon_portal_frame_cap_horizontal",
+      "x": -90
+    }
+  }
+}

@@ -26,9 +26,6 @@ import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class DungeonPortal
 {
     public DungeonPortal(ResourceKey<Level> level, BlockUtil.FoundRectangle levelBounds, Direction.Axis levelAxis,

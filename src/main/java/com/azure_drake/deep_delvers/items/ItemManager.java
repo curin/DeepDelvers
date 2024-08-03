@@ -39,6 +39,9 @@ public class ItemManager {
 
     public static final DeferredItem<BlockItem> DUNGEON_PORTAL_SPAWNER = ITEMS.registerSimpleBlockItem("dungeon_portal_spawner", BlockManager.DUNGEON_PORTAL_SPAWNER);
 
+    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME = ITEMS.registerSimpleBlockItem("dungeon_portal_frame", BlockManager.DUNGEON_PORTAL_FRAME);
+    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME_COSMETIC = ITEMS.registerSimpleBlockItem("dungeon_portal_frame_cosmetic", BlockManager.DUNGEON_PORTAL_FRAME_COSMETIC);
+
     public static List<ItemLike> Items = new ArrayList<ItemLike>()
     {{
         add(RAW_ALUMINUM);
@@ -53,6 +56,8 @@ public class ItemManager {
         add(RAW_DURALUMIN_BLOCK);
         add(DURALUMIN_INGOT);
         add(DURALUMIN_BLOCK);
+        add(DUNGEON_PORTAL_FRAME);
+        add(DUNGEON_PORTAL_FRAME_COSMETIC);
     }};
 
 

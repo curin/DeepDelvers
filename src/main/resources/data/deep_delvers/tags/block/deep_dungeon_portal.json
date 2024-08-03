@@ -1,5 +1,7 @@
 {
   "values": [
-    "#deep_delvers:deepslate"
+    "#deep_delvers:deepslate",
+    "deep_delvers:dungeon_portal_frame",
+    "deep_delvers:dungeon_portal_frame_cosmetic"
   ]
 }

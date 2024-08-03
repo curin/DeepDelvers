@@ -5,7 +5,7 @@
   "experience": 0.7,
   "group": "aluminum_ingot",
   "ingredient": {
-    "item": "deep_delvers:raw_tin"
+    "item": "deep_delvers:raw_aluminum"
   },
   "result": {
     "id": "deep_delvers:aluminum_ingot"
