@@ -68,19 +68,24 @@ public class DungeonPortal
         State = PortalState.Destroyed;
         ServerLevel level = server.getLevel(Level);
         Direction rightDir = LevelAxis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
-        BlockPos.betweenClosed(LevelBounds.minCorner, LevelBounds.minCorner.relative(Direction.UP, LevelBounds.axis1Size - 1).relative(rightDir, LevelBounds.axis2Size - 1))
-                .forEach(p_77725_ ->
-                {
-                    level.destroyBlock(p_77725_, false);
-                });
+        if (level != null)
+        {
+            BlockPos.betweenClosed(LevelBounds.minCorner, LevelBounds.minCorner.relative(Direction.UP, LevelBounds.axis1Size - 1).relative(rightDir, LevelBounds.axis2Size - 1))
+                    .forEach(p_77725_ ->
+                    {
+                        level.destroyBlock(p_77725_, false);
+                    });
+        }
 
         ServerLevel deeplevel = server.getLevel(DungeonManager.DEEP_DUGEON);
         rightDir = DungeonAxis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
-        BlockPos.betweenClosed(DungeonBounds.minCorner, DungeonBounds.minCorner.relative(Direction.UP, DungeonBounds.axis1Size - 1).relative(rightDir, DungeonBounds.axis2Size - 1))
-                .forEach(p_77725_ ->
-                {
-                    deeplevel.destroyBlock(p_77725_, false);
-                });
+        if (level != null) {
+            BlockPos.betweenClosed(DungeonBounds.minCorner, DungeonBounds.minCorner.relative(Direction.UP, DungeonBounds.axis1Size - 1).relative(rightDir, DungeonBounds.axis2Size - 1))
+                    .forEach(p_77725_ ->
+                    {
+                        deeplevel.destroyBlock(p_77725_, false);
+                    });
+        }
 
         if (DungeonLink.Id != -1)
         {
@@ -151,7 +156,7 @@ public class DungeonPortal
 
         DeepDungeon dungeonData = data.getDungeon(portalId.DungeonId);
 
-        if (dungeonData.Portals.size() <= portalId.Id)
+        if (dungeonData == null || dungeonData.Portals.size() <= portalId.Id)
         {
             pLevel.destroyBlock(pPos, false);
         }

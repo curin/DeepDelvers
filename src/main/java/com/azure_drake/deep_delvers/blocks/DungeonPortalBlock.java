@@ -159,6 +159,7 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
      * @deprecated call via {@link net.minecraft.world.level.block.state.BlockBehaviour.BlockStateBase#rotate} whenever possible. Implementing/overriding is fine.
      */
     @Override
+    @Deprecated
     protected BlockState rotate(BlockState pState, Rotation pRot) {
         switch (pRot) {
             case COUNTERCLOCKWISE_90:

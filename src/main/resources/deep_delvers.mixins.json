@@ -5,7 +5,8 @@
   "plugin": "com.azure_drake.deep_delvers.mixin.DeepDelversMixinConfigPlugin",
   "mixins": [
     "MixinMinecraftServer",
-    "MixinPlayerList"
+    "MixinPlayerList",
+    "MixinWorldBorderCommand"
   ],
   "client": [
   ],
