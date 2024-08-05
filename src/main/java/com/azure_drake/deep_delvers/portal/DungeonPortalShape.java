@@ -175,6 +175,11 @@ public class DungeonPortalShape
 
         PortalID portalID = DeepDungeon.CreateNewDungeon(tier, depth, level.getServer().getLevel(level.dimension()), getRectangle(), getAxis());
 
+        if (portalID.Id == -1)
+        {
+            return portalID;
+        }
+
         createPortalBlocks(portalID);
         return portalID;
     }

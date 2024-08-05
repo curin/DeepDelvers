@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.Vec3;
@@ -95,16 +96,34 @@ public class DungeonPortal
     }
 
     private static final int DungeonDistance = 10000;
-    private static final int DungeonMaxIDX = 15000000 / 10000;
 
     public static DungeonID GetDungeonId(BlockPos pPos)
     {
-        return new DungeonID(((5000 + pPos.getX()) / DungeonDistance) + ((5000 + pPos.getZ()) / DungeonDistance * DungeonMaxIDX), 4 - ((pPos.getY() + 415) / 75));
+        double distance = Math.sqrt( pPos.getX() * pPos.getX() + pPos.getZ() * pPos.getZ());
+        double angle = Math.atan2(pPos.getZ(), pPos.getX());
+        if (pPos.getX() < 0) {
+            angle += Math.PI;
+        }
+
+        return new DungeonID(Math.round((float)angle / (float)(Math.PI / 4)) + Math.round((float)distance / DungeonDistance) * 8,
+                4 - ((pPos.getY() + 448) / 75));
     }
 
-    public static BlockUtil.FoundRectangle GetDungeonRectFromId(PortalID id)
+    public static BlockUtil.FoundRectangle GetDungeonRectFromId(WorldBorder border, PortalID id)
     {
-        return new BlockUtil.FoundRectangle(new BlockPos((id.DungeonId.Id % DungeonMaxIDX) * DungeonDistance, -415 + ((4 - id.DungeonId.Tier) * 75),(id.DungeonId.Id / DungeonDistance) * DungeonDistance), 3, 3);
+        int distance = DungeonDistance * (((id.DungeonId.Id - 1) / 8) + 1);
+
+        if (distance + (DungeonDistance / 2) > border.getSize())
+        {
+            return new BlockUtil.FoundRectangle(new BlockPos(0, 0, 0), 0, 0);
+        }
+
+        double angle = Math.PI / 4 * ((id.DungeonId.Id - 1) % 8);
+
+        int x_id = Math.round((float)Math.cos(angle));
+        int z_id = Math.round((float)Math.sin(angle));
+
+        return new BlockUtil.FoundRectangle(new BlockPos(x_id * distance, -448 + ((4 - id.DungeonId.Tier) * 75),z_id * distance), 5, 5);
     }
 
     public static DimensionTransition GetTransition(PortalID portalId, ServerLevel pLevel, Entity pEntity, BlockPos pPos)

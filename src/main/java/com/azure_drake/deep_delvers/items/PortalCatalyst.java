@@ -33,11 +33,9 @@ public class PortalCatalyst extends Item
         BlockPos pPos = new BlockPos(context.getClickedPos().getX() + context.getClickedFace().getStepX(), context.getClickedPos().getY() + context.getClickedFace().getStepY(), context.getClickedPos().getZ() + context.getClickedFace().getStepZ());
         Optional<DungeonPortalShape> optional = DungeonPortalShape.findEmptyPortalShape(context.getLevel(), pPos, Direction.Axis.X);
 
-        if (optional.isEmpty()) {
+        if (optional.isEmpty() || optional.get().createPortalBlocks(tier, depth).Id == -1) {
             return super.onItemUseFirst(stack, context);
         }
-
-        optional.get().createPortalBlocks(tier, depth);
 
         if (context.getPlayer() == null || !context.getPlayer().isCreative())
         {

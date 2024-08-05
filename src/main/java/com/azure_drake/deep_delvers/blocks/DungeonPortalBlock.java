@@ -39,7 +39,7 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
 
     public DungeonPortalBlock()
     {
-        super(Properties.ofFullCopy(Blocks.NETHER_PORTAL));
+        super(Properties.ofFullCopy(Blocks.NETHER_PORTAL).lightLevel(i -> 8));
         //PortalId = portalId;
     }
 

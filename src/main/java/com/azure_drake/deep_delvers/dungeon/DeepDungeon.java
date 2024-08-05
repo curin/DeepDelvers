@@ -114,7 +114,15 @@ public class DeepDungeon
     public static PortalID CreateNewDungeon(int tier, int depth, ServerLevel level, BlockUtil.FoundRectangle levelBounds, Direction.Axis levelAxis)
     {
         PortalID portalId = new PortalID(DeepDelversData.GetNextDungeonId(level, tier), 0);
-        DungeonPortal portal = new DungeonPortal(level.dimension(), levelBounds, levelAxis, DungeonPortal.GetDungeonRectFromId(portalId), Direction.Axis.Y);
+
+        BlockUtil.FoundRectangle dungeonPortalRect = DungeonPortal.GetDungeonRectFromId(level.getServer().getLevel(DungeonManager.DEEP_DUGEON).getWorldBorder(), portalId);
+
+        if (dungeonPortalRect.axis1Size == 0)
+        {
+            return new PortalID(new DungeonID(-1, -1), -1);
+        }
+
+        DungeonPortal portal = new DungeonPortal(level.dimension(), levelBounds, levelAxis, dungeonPortalRect, Direction.Axis.Y);
 
         List<DungeonPortal> portals = new ArrayList<>();
         portals.add(portal);
@@ -131,7 +139,14 @@ public class DeepDungeon
     {
         PortalID portalId = new PortalID(Id, getNextAvailablePortal());
 
-        DungeonPortal portal = new DungeonPortal(level.dimension(), levelBounds, levelAxis, DungeonPortal.GetDungeonRectFromId(portalId), Direction.Axis.Y);
+        BlockUtil.FoundRectangle dungeonPortalRect = DungeonPortal.GetDungeonRectFromId(level.getServer().getLevel(DungeonManager.DEEP_DUGEON).getWorldBorder(), portalId);
+
+        if (dungeonPortalRect.axis1Size == 0)
+        {
+            return new PortalID(new DungeonID(-1, -1), -1);
+        }
+
+        DungeonPortal portal = new DungeonPortal(level.dimension(), levelBounds, levelAxis, dungeonPortalRect, Direction.Axis.Y);
 
         Portals.add(portal);
         return portalId;
@@ -141,7 +156,14 @@ public class DeepDungeon
     {
         PortalID portalId = new PortalID(Id, getNextAvailablePortal());
 
-        DungeonPortal portal = new DungeonPortal(level.dimension(), levelBounds, levelAxis, DungeonPortal.GetDungeonRectFromId(portalId), Direction.Axis.Y);
+        BlockUtil.FoundRectangle dungeonPortalRect = DungeonPortal.GetDungeonRectFromId(level.getServer().getLevel(DungeonManager.DEEP_DUGEON).getWorldBorder(), portalId);
+
+        if (dungeonPortalRect.axis1Size == 0)
+        {
+            return new PortalID(new DungeonID(-1, -1), -1);
+        }
+
+        DungeonPortal portal = new DungeonPortal(level.dimension(), levelBounds, levelAxis, dungeonPortalRect, Direction.Axis.Y);
         portal.State = PortalState.Unconnected_To_Level;
         portal.DungeonLink = connected;
 

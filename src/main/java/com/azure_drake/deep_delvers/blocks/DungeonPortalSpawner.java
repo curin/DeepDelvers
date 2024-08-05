@@ -23,7 +23,7 @@ import java.util.Optional;
 public class DungeonPortalSpawner extends Block
 {
     public DungeonPortalSpawner() {
-        super(Properties.ofFullCopy(Blocks.STRUCTURE_BLOCK));
+        super(Properties.ofFullCopy(Blocks.STRUCTURE_BLOCK).lightLevel(i -> 8));
     }
 
     @Override
@@ -82,9 +82,22 @@ public class DungeonPortalSpawner extends Block
                     depth = 0;
                     tier++;
                 }
+
                 PortalID connected = optional.get().createPortalBlocks(tier, depth);
 
+                if (portalID.Id == -1)
+                {
+                    pLevel.destroyBlock(pPos, false);
+                    return;
+                }
+
                 PortalID myPortal = dungeon.CreateNewPortalInside(pLevel, optional.get().getRectangle(), optional.get().getAxis(), connected);
+
+                if (myPortal.Id == -1)
+                {
+                    pLevel.destroyBlock(pPos, false);
+                    return;
+                }
 
                 DeepDungeon dungeon2 = data.getDungeon(connected.DungeonId);
                 dungeon2.Portals.get(connected.Id).DungeonLink = myPortal;
