@@ -27,7 +27,7 @@ public class DungeonPortalFrame extends Block {
     public static DungeonPortalFrame Cosmetic() { return new DungeonPortalFrame(false); }
 
     public DungeonPortalFrame(boolean Invulnerable) {
-        super((Invulnerable ? Properties.ofFullCopy(Blocks.BEDROCK) : Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).destroyTime(14.0f)).lightLevel(state -> state.getValue(CONNECTED_STATE) == ConnectedPillarState.Middle ? 14: 0));
+        super((Invulnerable ? Properties.ofFullCopy(Blocks.BEDROCK) : Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS).destroyTime(14.0f)).lightLevel(state -> state.getValue(CONNECTED_STATE) == ConnectedPillarState.Middle ? 10: 0));
     }
 
     @Override
