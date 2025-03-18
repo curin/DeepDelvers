@@ -1,6 +1,8 @@
 package com.azure_drake.deep_delvers.blocks;
 
 import com.azure_drake.deep_delvers.Config;
+import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalSpawnerTileEntity;
+import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
 import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
@@ -9,105 +11,50 @@ import com.azure_drake.deep_delvers.portal.DungeonPortalShape;
 import com.azure_drake.deep_delvers.portal.PortalID;
 import com.azure_drake.deep_delvers.portal.PortalState;
 import com.azure_drake.deep_delvers.world.DeepDelversData;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TexturedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
-public class DungeonPortalSpawner extends Block
+public class DungeonPortalSpawner extends DeepDelversBlock implements EntityBlock
 {
-    public DungeonPortalSpawner() {
-        super(Properties.ofFullCopy(Blocks.STRUCTURE_BLOCK).lightLevel(i -> 8));
+    public DungeonPortalSpawner(Properties properties) {
+        super(properties);
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new DungeonPortalSpawnerTileEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+        return blockEntityType == BlockManager.DUNGEON_PORTAL_SPAWNER_ENTITY.get() ? (BlockEntityTicker<T>) DungeonPortalSpawnerTileEntity::tick : null;
     }
 
     @Override
-    protected void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
-        super.tick(pState, pLevel, pPos, pRandom);
-
-        if (pLevel.dimension() != DungeonManager.DEEP_DUGEON)
-        {
-            return;
-        }
-
-        DeepDelversData data = DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON));
-        DungeonID id = DungeonPortal.GetDungeonId(pPos);
-        DeepDungeon dungeon = data.getDungeon(id);
-
-        Optional<DungeonPortalShape> optional = DungeonPortalShape.findEmptyPortalShape(pLevel, pPos, Direction.Axis.X);
-
-        if (optional.isEmpty()) {
-            pLevel.destroyBlock(pPos, false);
-            return;
-        }
-
-        PortalID portalID = null;
-        List<DungeonPortal> portals = dungeon.Portals;
-        for (int i = 0, portalsSize = portals.size(); i < portalsSize; i++) {
-            DungeonPortal portal = portals.get(i);
-            if (portal.State == PortalState.Unconnected_To_Dungeon) {
-                portalID = new PortalID(id, i);
-                portal.DungeonBounds = optional.get().getRectangle();
-                portal.DungeonAxis = optional.get().getAxis();
-                portal.State = PortalState.Connected;
-
-                if (portal.DungeonLink.Id != -1)
-                {
-                    DeepDungeon dungeon2 = data.getDungeon(portal.DungeonLink.DungeonId);
-                    DungeonPortal portal2 = dungeon2.Portals.get(portal.DungeonLink.Id);
-                    portal2.LevelBounds = optional.get().getRectangle();
-                    portal2.LevelAxis = optional.get().getAxis();
-                    portal2.State = PortalState.Connected;
-                }
-
-                break;
-            }
-        }
-
-        if (portalID == null)
-        {
-            if (pLevel.random.nextInt(100) < Config.InDungeonNexusChance)
-            {
-                //TODO: Spawn Nexus or Connect to Nexus
-            }
-            else {
-                int depth = dungeon.Depth + (pLevel.random.nextInt(100) > 75 ? 1 : 0);
-                int tier = id.Tier;
-                if (depth > 4) {
-                    depth = 0;
-                    tier++;
-                }
-
-                PortalID connected = optional.get().createPortalBlocks(tier, depth);
-
-                if (portalID.Id == -1)
-                {
-                    pLevel.destroyBlock(pPos, false);
-                    return;
-                }
-
-                PortalID myPortal = dungeon.CreateNewPortalInside(pLevel, optional.get().getRectangle(), optional.get().getAxis(), connected);
-
-                if (myPortal.Id == -1)
-                {
-                    pLevel.destroyBlock(pPos, false);
-                    return;
-                }
-
-                DeepDungeon dungeon2 = data.getDungeon(connected.DungeonId);
-                dungeon2.Portals.get(connected.Id).DungeonLink = myPortal;
-            }
-        }
-        else
-        {
-            optional.get().createPortalBlocks(portalID);
-        }
-
-        data.putDungeon(id, dungeon);
+    public void GenerateModel(BlockModelGenerators blockModels)
+    {
+        blockModels.createTrivialBlock(this, TexturedModel.createDefault(block -> TextureMapping.cube(BlockManager.DUNGEON_PORTAL.get()), ModelTemplates.CUBE_ALL));
     }
 }

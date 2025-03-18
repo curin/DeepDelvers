@@ -6,7 +6,52 @@
       "biome": "deep_delvers:dungeon",
       "lakes": false,
       "features": false,
-      "layers": [],
+      "layers": [
+        {
+          "block": "deep_delvers:deep_rock",
+          "height": 1
+        },
+        {
+          "block": "minecraft:air",
+          "height": 78
+        },
+        {
+          "block": "deep_delvers:deep_rock",
+          "height": 2
+        },
+        {
+          "block": "minecraft:air",
+          "height": 78
+        },
+        {
+          "block": "deep_delvers:deep_rock",
+          "height": 2
+        },
+        {
+          "block": "minecraft:air",
+          "height": 78
+        },
+        {
+          "block": "deep_delvers:deep_rock",
+          "height": 2
+        },
+        {
+          "block": "minecraft:air",
+          "height": 78
+        },
+        {
+          "block": "deep_delvers:deep_rock",
+          "height": 2
+        },
+        {
+          "block": "minecraft:air",
+          "height": 78
+        },
+        {
+          "block": "deep_delvers:deep_rock",
+          "height": 1
+        }
+      ],
       "structure_overrides": []
     }
   }

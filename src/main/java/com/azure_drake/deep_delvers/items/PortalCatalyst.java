@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public class PortalCatalyst extends Item
+public class PortalCatalyst extends DeepDelversItem
 {
-    public PortalCatalyst() {
-        super(new Properties().fireResistant().stacksTo(1));
+    public PortalCatalyst(Properties properties) {
+        super(properties);
     }
 
     @Override

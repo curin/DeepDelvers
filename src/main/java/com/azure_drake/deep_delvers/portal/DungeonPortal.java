@@ -23,12 +23,17 @@ import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.Vec3;
 
 public class DungeonPortal
 {
+    public static final int DEPTH_HEIGHT = 80;
+    public static final int MIN_HEIGHT = -464;
+
+    public static final int DEPTH_COUNT = 5;
+
     public DungeonPortal(ResourceKey<Level> level, BlockUtil.FoundRectangle levelBounds, Direction.Axis levelAxis,
                          BlockUtil.FoundRectangle dungeonBounds, Direction.Axis dungeonAxis)
     {
@@ -99,34 +104,70 @@ public class DungeonPortal
 
     public static DungeonID GetDungeonId(BlockPos pPos)
     {
-        double distance = Math.sqrt( pPos.getX() * pPos.getX() + pPos.getZ() * pPos.getZ());
-        double angle = Math.atan2(pPos.getZ(), pPos.getX());
-        if (pPos.getX() < 0) {
-            angle += Math.PI;
-        }
+        int x_val = GetDungeonCoord(pPos.getX());
+        int z_val = GetDungeonCoord(pPos.getZ());
 
-        return new DungeonID(Math.round((float)angle / (float)(Math.PI / 4)) + Math.round((float)distance / DungeonDistance) * 8,
-                4 - ((pPos.getY() + 448) / 75));
+        int layer = Math.max(Math.abs(x_val), Math.abs(z_val));
+
+        int startValue = layer == 0 ? 0 : 4 * layer * (layer - 1) + 1;
+
+        int sideAdjust = (1 + 2 * layer) / 2 - layer;
+
+        int steps = 0;
+
+        if (x_val == layer)  // Right side
+            steps = layer + (z_val + sideAdjust);
+        else if (z_val == layer)  // Top side
+            steps = 3 * layer - (x_val - sideAdjust);
+        else if (x_val == -layer)  // Left side
+            steps = 5 * layer - (z_val - sideAdjust);
+        else  // Bottom side
+            steps = 7 * layer + (x_val + sideAdjust);
+
+        return new DungeonID(startValue + steps,
+                (DEPTH_COUNT - 1) - ((pPos.getY() - MIN_HEIGHT) / DEPTH_HEIGHT));
+    }
+
+    private static int GetDungeonCoord(int val)
+    {
+        return (Math.abs(val) + (DungeonDistance / 2)) / DungeonDistance * (val >= 0 ? 1 : -1);
     }
 
     public static BlockUtil.FoundRectangle GetDungeonRectFromId(WorldBorder border, PortalID id)
     {
-        int distance = DungeonDistance * (((id.DungeonId.Id - 1) / 8) + 1);
+        int layer = (int)Math.sqrt(id.DungeonId.Id);
+        layer = layer - (layer / 2);
 
-        if (distance + (DungeonDistance / 2) > border.getSize())
+        int startValue = layer == 0 ? 0 : 4 * layer * (layer - 1) + 1;
+        int steps = id.DungeonId.Id - startValue;
+
+        int x_id = 0;
+        int z_id = 0;
+        if (steps < 2 * layer)
         {
-            return new BlockUtil.FoundRectangle(new BlockPos(0, 0, 0), 0, 0);
+            x_id = layer;
+            z_id = -layer + steps;
+        }
+        else if (steps < 4 * layer)
+        {
+            z_id = layer;
+            x_id = layer - steps;
+        }
+        else if (steps < 6 * layer)
+        {
+            x_id = -layer;
+            z_id = layer - steps;
+        }
+        else
+        {
+            z_id = -layer;
+            x_id = -layer + steps;
         }
 
-        double angle = Math.PI / 4 * ((id.DungeonId.Id - 1) % 8);
-
-        int x_id = Math.round((float)Math.cos(angle));
-        int z_id = Math.round((float)Math.sin(angle));
-
-        return new BlockUtil.FoundRectangle(new BlockPos(x_id * distance, -448 + ((4 - id.DungeonId.Tier) * 75),z_id * distance), 5, 5);
+        return new BlockUtil.FoundRectangle(new BlockPos(x_id * DungeonDistance, MIN_HEIGHT + (((DEPTH_COUNT - 1) - id.DungeonId.Tier) * DEPTH_HEIGHT),z_id * DungeonDistance), 5, 5);
     }
 
-    public static DimensionTransition GetTransition(PortalID portalId, ServerLevel pLevel, Entity pEntity, BlockPos pPos)
+    public static TeleportTransition GetTransition(PortalID portalId, ServerLevel pLevel, Entity pEntity, BlockPos pPos)
     {
         DeepDungeon dungeonData = DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON)).getDungeon(portalId.DungeonId);
 
@@ -136,13 +177,13 @@ public class DungeonPortal
             {
                 return getDimensionTransitionFromExit(pEntity, pPos,
                         new BlockUtil.FoundRectangle(new BlockPos(0,0,0), 5, 5), pLevel.getServer().getLevel(net.minecraft.world.level.Level.OVERWORLD),
-                        DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET));
+                        TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
             }
             else
             {
                 return getDimensionTransitionFromExit(pEntity, pPos,
                         new BlockUtil.FoundRectangle(new BlockPos(0,0,0), 5, 5), pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON),
-                        DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET));
+                        TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
             }
         }
 
@@ -151,12 +192,12 @@ public class DungeonPortal
         {
             return getDimensionTransitionFromExit(pEntity, pPos,
                     portal.LevelBounds, pLevel.getServer().getLevel(portal.Level),
-                    DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET));
+                    TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
         }
 
         return getDimensionTransitionFromExit(pEntity, pPos,
                 portal.DungeonBounds, pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON),
-                DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET));
+                TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET));
     }
 
     public static void BeginTeleport(PortalID portalId, Level pLevel, BlockPos pPos, Entity pEntity, Portal portal)
@@ -171,6 +212,7 @@ public class DungeonPortal
         if (!data.containsDungeon(portalId.DungeonId))
         {
             pLevel.destroyBlock(pPos, false);
+            return;
         }
 
         DeepDungeon dungeonData = data.getDungeon(portalId.DungeonId);
@@ -178,6 +220,7 @@ public class DungeonPortal
         if (dungeonData == null || dungeonData.Portals.size() <= portalId.Id)
         {
             pLevel.destroyBlock(pPos, false);
+            return;
         }
 
         DungeonPortal dungeonPortal = dungeonData.Portals.get(portalId.Id);
@@ -264,8 +307,8 @@ public class DungeonPortal
                 position.getZ() >= portalBounds.minCorner.getZ() && position.getZ() <= maxCorner.getZ();
     }
 
-    private static DimensionTransition getDimensionTransitionFromExit(
-            Entity pEntity, BlockPos pPos, BlockUtil.FoundRectangle pRectangle, ServerLevel pLevel, DimensionTransition.PostDimensionTransition pPostDimensionTransition
+    private static TeleportTransition getDimensionTransitionFromExit(
+            Entity pEntity, BlockPos pPos, BlockUtil.FoundRectangle pRectangle, ServerLevel pLevel, TeleportTransition.PostTeleportTransition pPostDimensionTransition
     ) {
         BlockState blockstate = pEntity.level().getBlockState(pPos);
         Direction.Axis direction$axis;
@@ -286,7 +329,7 @@ public class DungeonPortal
         );
     }
 
-    private static DimensionTransition createDimensionTransition(
+    private static TeleportTransition createDimensionTransition(
             ServerLevel pLevel,
             BlockUtil.FoundRectangle pRectangle,
             Direction.Axis pAxis,
@@ -295,7 +338,7 @@ public class DungeonPortal
             Vec3 pSpeed,
             float pYRot,
             float pXRot,
-            DimensionTransition.PostDimensionTransition pPostDimensionTransition
+            TeleportTransition.PostTeleportTransition pPostDimensionTransition
     ) {
         BlockPos blockpos = pRectangle.minCorner;
         BlockState blockstate = pLevel.getBlockState(blockpos);
@@ -311,7 +354,7 @@ public class DungeonPortal
         boolean flag = direction$axis == Direction.Axis.X;
         Vec3 vec31 = new Vec3((double)blockpos.getX() + (flag ? d2 : d4), (double)blockpos.getY() + d3, (double)blockpos.getZ() + (flag ? d4 : d2));
         Vec3 vec32 = PortalShape.findCollisionFreePosition(vec31, pLevel, pEntity, entitydimensions);
-        return new DimensionTransition(pLevel, vec32, vec3, pYRot + (float)i, pXRot, pPostDimensionTransition);
+        return new TeleportTransition(pLevel, vec32, vec3, pYRot + (float)i, pXRot, pPostDimensionTransition);
     }
 
     public static boolean isPortalFrame(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos)

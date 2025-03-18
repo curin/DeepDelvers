@@ -15,15 +15,20 @@
       "block_search_extent": 8,
       "offset": 2
     },
-    "music": {
-      "sound": "minecraft:music.overworld.deep_dark",
-      "min_delay": 24000,
-      "max_delay": 12000,
-      "replace_current_music": false
-    }
+    "music": [
+      {
+        "data": {
+          "sound": "minecraft:music.overworld.deep_dark",
+          "min_delay": 24000,
+          "max_delay": 12000,
+          "replace_current_music": false
+        },
+        "weight": 1
+      }
+    ]
   },
   "spawners": {},
   "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": []
 }

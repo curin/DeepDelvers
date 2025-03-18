@@ -2,67 +2,57 @@ package com.azure_drake.deep_delvers.items;
 
 import com.azure_drake.deep_delvers.DeepDelversMod;
 import com.azure_drake.deep_delvers.blocks.BlockManager;
+import com.azure_drake.deep_delvers.blocks.DeepDelversBlock;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ItemManager {
-    // Create a Deferred Register to hold Items which will all be registered under the "examplemod" namespace
+    public static List<ItemLike> CreativeItems = new ArrayList<ItemLike>();
+    public static List<Supplier<? extends DeepDelversItem>> Datagen = new ArrayList<>();
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(DeepDelversMod.MODID);
-    public static final DeferredItem<BlockItem> DURALUMIN_BLOCK = ITEMS.registerSimpleBlockItem("duralumin_block", BlockManager.DURALUMIN_BLOCK);
-    public static final DeferredItem<Item> DURALUMIN_INGOT = ITEMS.registerSimpleItem("duralumin_ingot", new Item.Properties());
-    public static final DeferredItem<Item> RAW_DURALUMIN = ITEMS.registerSimpleItem("raw_duralumin", new Item.Properties());
-    public static final DeferredItem<BlockItem> RAW_DURALUMIN_BLOCK = ITEMS.registerSimpleBlockItem("raw_duralumin_block", BlockManager.RAW_DURALUMIN_BLOCK);
 
-    public static final DeferredItem<BlockItem> ALUMINUM_BLOCK = ITEMS.registerSimpleBlockItem("aluminum_block", BlockManager.ALUMINUM_BLOCK);
-    public static final DeferredItem<BlockItem> ALUMINUM_ORE = ITEMS.registerSimpleBlockItem("aluminum_ore", BlockManager.ALUMINUM_ORE);
-    public static final DeferredItem<BlockItem> DEEPSLATE_ALUMINUM_ORE = ITEMS.registerSimpleBlockItem("deepslate_aluminum_ore", BlockManager.DEEPSLATE_ALUMINUM_ORE);
-    public static final DeferredItem<Item> RAW_ALUMINUM = ITEMS.registerSimpleItem("raw_aluminum", new Item.Properties());
+    public static final DeferredItem<BlockItem> ALUMINUM_ORE = RegisterBlockItem(BlockManager.ALUMINUM_ORE);
+    public static final DeferredItem<BlockItem> DEEPSLATE_ALUMINUM_ORE = RegisterBlockItem(BlockManager.DEEPSLATE_ALUMINUM_ORE);
 
-    public static final DeferredItem<BlockItem> RAW_ALUMINUM_BLOCK = ITEMS.registerSimpleBlockItem("raw_aluminum_block", BlockManager.RAW_ALUMINUM_BLOCK);
-    public static final DeferredItem<Item> ALUMINUM_INGOT = ITEMS.registerSimpleItem("aluminum_ingot", new Item.Properties());
+    public static final DeferredItem<DeepDelversItem> RAW_ALUMINUM = RegisterItem("raw_aluminum", new Item.Properties());
+    public static final DeferredItem<BlockItem> RAW_ALUMINUM_BLOCK = RegisterBlockItem(BlockManager.RAW_ALUMINUM_BLOCK);
 
-    public static final DeferredItem<BlockItem> DEEP_ROCK = ITEMS.registerSimpleBlockItem("deep_rock", BlockManager.DEEP_ROCK);
+    public static final DeferredItem<DeepDelversItem> ALUMINUM_INGOT = RegisterItem("aluminum_ingot", new Item.Properties());
+    public static final DeferredItem<BlockItem> ALUMINUM_BLOCK = RegisterBlockItem(BlockManager.ALUMINUM_BLOCK);
 
-    public static final DeferredItem<PortalCatalyst> PORTAL_CATALYST = ITEMS.register("portal_catalyst", PortalCatalyst::new);
+    public static final DeferredItem<DeepDelversItem> RAW_DURALUMIN = RegisterItem("raw_duralumin", new Item.Properties());
+    public static final DeferredItem<BlockItem> RAW_DURALUMIN_BLOCK = RegisterBlockItem(BlockManager.RAW_DURALUMIN_BLOCK);
 
-    public static final DeferredItem<BlockItem> DUNGEON_PORTAL = ITEMS.registerSimpleBlockItem("dungeon_portal", BlockManager.DUNGEON_PORTAL);
+    public static final DeferredItem<DeepDelversItem> DURALUMIN_INGOT = RegisterItem("duralumin_ingot", new Item.Properties());
+    public static final DeferredItem<BlockItem> DURALUMIN_BLOCK = RegisterBlockItem(BlockManager.DURALUMIN_BLOCK);
 
-    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_SPAWNER = ITEMS.registerSimpleBlockItem("dungeon_portal_spawner", BlockManager.DUNGEON_PORTAL_SPAWNER);
+    public static final DeferredItem<BlockItem> DEEP_ROCK = RegisterBlockItem(BlockManager.DEEP_ROCK);
 
-    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME = ITEMS.registerSimpleBlockItem("dungeon_portal_frame", BlockManager.DUNGEON_PORTAL_FRAME);
-    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME_COSMETIC = ITEMS.registerSimpleBlockItem("dungeon_portal_frame_cosmetic", BlockManager.DUNGEON_PORTAL_FRAME_COSMETIC);
+    public static final DeferredItem<PortalCatalyst> PORTAL_CATALYST = RegisterItem("portal_catalyst", PortalCatalyst::new, new Item.Properties().fireResistant().stacksTo(1));
 
-    public static List<ItemLike> Items = new ArrayList<ItemLike>()
-    {{
-        add(RAW_ALUMINUM);
-        add(RAW_ALUMINUM_BLOCK);
-        add(ALUMINUM_INGOT);
-        add(ALUMINUM_BLOCK);
-        add(ALUMINUM_ORE);
-        add(DEEPSLATE_ALUMINUM_ORE);
-        add(DEEP_ROCK);
-        add(PORTAL_CATALYST);
-        add(RAW_DURALUMIN);
-        add(RAW_DURALUMIN_BLOCK);
-        add(DURALUMIN_INGOT);
-        add(DURALUMIN_BLOCK);
-        add(DUNGEON_PORTAL_FRAME);
-        add(DUNGEON_PORTAL_FRAME_COSMETIC);
-    }};
+    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME = RegisterBlockItem(BlockManager.DUNGEON_PORTAL_FRAME);
+    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME_COSMETIC = RegisterBlockItem(BlockManager.DUNGEON_PORTAL_FRAME_COSMETIC, BlockManager.DUNGEON_PORTAL_FRAME);
+
+    //public static final DeferredItem<BlockItem> DUNGEON_PORTAL = RegisterBlockItem(BlockManager.DUNGEON_PORTAL, false);
+    public static final DeferredItem<BlockItem> DUNGEON_PORTAL_SPAWNER = RegisterBlockItem(BlockManager.DUNGEON_PORTAL_SPAWNER, false);
 
 
     // The specialized DeferredRegister.DataComponents simplifies data component registration and avoids some generic inference issues with the `DataComponentType.Builder` within a `Supplier`
-    public static final DeferredRegister.DataComponents COMPONENTS = DeferredRegister.createDataComponents(DeepDelversMod.MODID);
+    public static final DeferredRegister.DataComponents COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, DeepDelversMod.MODID);
 
     public static final Supplier<DataComponentType<Integer>> CATALYST_TIER = COMPONENTS.registerComponentType("catalyst_tier",
             builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT));
@@ -79,8 +69,70 @@ public class ItemManager {
 
     public static void addToCreativeTab(CreativeModeTab.Output output)
     {
-        for (ItemLike item : Items) {
+        for (ItemLike item : CreativeItems) {
             output.accept(item);
         }
+    }
+
+    public static <T extends Block> DeferredItem<BlockItem> RegisterBlockItem(DeferredBlock<T> block, boolean addToCreative)
+    {
+        DeferredItem<BlockItem> item = ITEMS.registerSimpleBlockItem(block.getKey().location().getPath(), block);
+        if (addToCreative)
+        {
+            CreativeItems.add(item);
+        }
+        return item;
+    }
+
+    public static <T extends Block> DeferredItem<BlockItem> RegisterBlockItem(DeferredBlock<T> block)
+    {
+        return RegisterBlockItem(block, true);
+    }
+
+    public static <T extends Block, V extends Block> DeferredItem<BlockItem> RegisterBlockItem(DeferredBlock<T> block, DeferredBlock<V> visual, boolean addToCreative)
+    {
+        DeferredItem<BlockItem> item = ITEMS.registerSimpleBlockItem(block.getKey().location().getPath(), visual);
+        if (addToCreative)
+        {
+            CreativeItems.add(item);
+        }
+        return item;
+    }
+
+    public static <T extends Block, V extends Block> DeferredItem<BlockItem> RegisterBlockItem(DeferredBlock<T> block, DeferredBlock<V> visual)
+    {
+        return RegisterBlockItem(block, visual,true);
+    }
+
+    public static <T extends DeepDelversItem> DeferredItem<T> RegisterItem(String name, Function<Item.Properties, T> constructor, Item.Properties properties, boolean addToCreative)
+    {
+        DeferredItem<T> item = ITEMS.registerItem(name, constructor, properties);
+        if (addToCreative)
+        {
+            CreativeItems.add(item);
+        }
+        Datagen.add(item);
+        return item;
+    }
+
+    public static <T extends DeepDelversItem> DeferredItem<T> RegisterItem(String name, Function<Item.Properties, T> constructor, Item.Properties properties)
+    {
+        return RegisterItem(name, constructor, properties, true);
+    }
+
+    public static DeferredItem<DeepDelversItem> RegisterItem(String name, Item.Properties properties, boolean addToCreative)
+    {
+        DeferredItem<DeepDelversItem> item = ITEMS.registerItem(name, DeepDelversItem::new, properties);
+        if (addToCreative)
+        {
+            CreativeItems.add(item);
+        }
+        Datagen.add(item);
+        return item;
+    }
+
+    public static DeferredItem<DeepDelversItem> RegisterItem(String name, Item.Properties properties)
+    {
+        return RegisterItem(name, DeepDelversItem::new, properties);
     }
 }

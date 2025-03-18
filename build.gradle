@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
+    id 'net.neoforged.gradle.userdev' version '7.0.183'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -23,6 +23,14 @@ repositories {
     maven {
         name = "OctoStudios"
         url = uri("https://maven.octo-studios.com/releases")
+    }
+
+    maven {
+        url "https://maven.blamejared.com"
+    }
+
+    repositories {
+        maven { url "https://maven.shedaniel.me" }
     }
 }
 
@@ -63,7 +71,7 @@ runs {
 
     server {
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
+        arguments '--nogui'
     }
 
     // This run config launches GameTestServer and runs all registered gametests, then exits.
@@ -73,12 +81,12 @@ runs {
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
     }
 
-    data {
+    clientData {
         // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
         // workingDirectory project.file('run-data')
 
         // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 
@@ -102,14 +110,20 @@ dependencies {
     // For all intends and purposes: You can treat this dependency as if it is a normal library you would use.
     implementation "net.neoforged:neoforge:${neo_version}"
 
-    implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    //implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
-    // Example optional mod dependency with JEI
+    // optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
-    // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+    //compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    //compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
-    // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+    //localRuntime "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+    // optional mod dependency with REI
+    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
+    compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:${rei_version}"
+    // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
+    localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar

@@ -1,45 +1,51 @@
 package com.azure_drake.deep_delvers.blocks;
 
 import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
+import com.azure_drake.deep_delvers.datagen.DeepDelversModelTemplates;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
 import com.azure_drake.deep_delvers.portal.DungeonPortal;
 import com.azure_drake.deep_delvers.world.DeepDelversData;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.blockstates.PropertyDispatch;
+import net.minecraft.client.data.models.blockstates.Variant;
+import net.minecraft.client.data.models.blockstates.VariantProperties;
+import net.minecraft.client.data.models.model.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class DungeonPortalBlock extends Block implements Portal, EntityBlock
+import java.util.function.BiConsumer;
+
+public class DungeonPortalBlock extends DeepDelversBlock implements Portal, EntityBlock
 {
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
     protected static final VoxelShape X_AXIS_AABB = Block.box(0.0, 0.0, 6.0, 16.0, 16.0, 10.0);
     protected static final VoxelShape Z_AXIS_AABB = Block.box(6.0, 0.0, 0.0, 10.0, 16.0, 16.0);
 
-    public DungeonPortalBlock()
+    public DungeonPortalBlock(Properties properties)
     {
-        super(Properties.ofFullCopy(Blocks.NETHER_PORTAL).lightLevel(i -> 8));
+        super(properties);
         //PortalId = portalId;
     }
 
@@ -60,13 +66,20 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
      * Note that this method should ideally consider only the specific direction passed in.
      */
     @Override
-    protected BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {
-        Direction.Axis direction$axis = pFacing.getAxis();
-        Direction.Axis direction$axis1 = pState.getValue(AXIS);
+    protected BlockState updateShape(BlockState state,
+                                     LevelReader level,
+                                     ScheduledTickAccess scheduledTickAccess,
+                                     BlockPos pos,
+                                     Direction direction,
+                                     BlockPos neighborPos,
+                                     BlockState neighborState,
+                                     RandomSource random) {
+        Direction.Axis direction$axis = direction.getAxis();
+        Direction.Axis direction$axis1 = state.getValue(AXIS);
         boolean flag = direction$axis1 != direction$axis && direction$axis.isHorizontal();
-        return !flag && !pFacingState.is(this) && !new PortalShape(pLevel, pCurrentPos, direction$axis1).isComplete()
+        return !flag && !neighborState.is(this) && !PortalShape.findAnyShape(level, pos, direction$axis1).isComplete()
                 ? Blocks.AIR.defaultBlockState()
-                : super.updateShape(pState, pFacing, pFacingState, pLevel, pCurrentPos, pFacingPos);
+                : super.updateShape(state, level, scheduledTickAccess, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
@@ -85,7 +98,7 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
         }
 
         DungeonPortalTileEntity titleEntity = (DungeonPortalTileEntity)pLevel.getBlockEntity(pPos);
-        DeepDelversData data =DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON));
+        DeepDelversData data = DeepDelversData.get(pLevel.getServer().getLevel(DungeonManager.DEEP_DUGEON));
         DeepDungeon dungeon = data.getDungeon(titleEntity.getPortalId().DungeonId);
 
         if (dungeon != null)
@@ -102,7 +115,7 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
 
     @Nullable
     @Override
-    public DimensionTransition getPortalDestination(ServerLevel pLevel, Entity pEntity, BlockPos pPos)
+    public TeleportTransition getPortalDestination(ServerLevel pLevel, Entity pEntity, BlockPos pPos)
     {
         DungeonPortalTileEntity titleEntity = (DungeonPortalTileEntity)pLevel.getBlockEntity(pPos);
         return DungeonPortal.GetTransition(titleEntity.getPortalId(), pLevel, pEntity, pPos);
@@ -149,11 +162,6 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
         }
     }
 
-    @Override
-    public ItemStack getCloneItemStack(LevelReader pLevel, BlockPos pPos, BlockState pState) {
-        return ItemStack.EMPTY;
-    }
-
     /**
      * Returns the blockstate with the given rotation from the passed blockstate. If inapplicable, returns the passed blockstate.
      * @deprecated call via {@link net.minecraft.world.level.block.state.BlockBehaviour.BlockStateBase#rotate} whenever possible. Implementing/overriding is fine.
@@ -180,5 +188,30 @@ public class DungeonPortalBlock extends Block implements Portal, EntityBlock
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(AXIS);
+    }
+
+
+
+    @Override
+    public void GenerateModel(BlockModelGenerators blockModels)
+    {
+        blockModels.blockStateOutput
+                .accept(
+                        MultiVariantGenerator.multiVariant(this)
+                                .with(
+                                        PropertyDispatch.property(BlockStateProperties.HORIZONTAL_AXIS)
+                                                .select(
+                                                        Direction.Axis.X,
+                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(this, "_ns"))
+                                                )
+                                                .select(
+                                                        Direction.Axis.Z,
+                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(this, "_ew"))
+                                                )
+                                )
+                );
+
+        DeepDelversModelTemplates.PORTAL_NS_TEMPLATE_PROVIDER.createWithSuffix(this, "_ns", blockModels.modelOutput);
+        DeepDelversModelTemplates.PORTAL_EW_TEMPLATE_PROVIDER.createWithSuffix(this, "_ew", blockModels.modelOutput);
     }
 }

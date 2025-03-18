@@ -76,7 +76,7 @@ public class DungeonPortalShape
 
     @Nullable
     private BlockPos calculateBottomLeft(BlockPos pPos) {
-        int i = Math.max(this.level.getMinBuildHeight(), pPos.getY() - 21);
+        int i = Math.max(this.level.getMinY(), pPos.getY() - 21);
 
         while (pPos.getY() > i && isEmpty(this.level.getBlockState(pPos.below()))) {
             pPos = pPos.below();
@@ -196,6 +196,12 @@ public class DungeonPortalShape
 
     public void createPortalBlocks(PortalID id)
     {
+        BlockPos.betweenClosed(this.bottomLeft, this.bottomLeft.relative(Direction.UP, this.height - 1).relative(this.rightDir, this.width - 1))
+                .forEach(p_77725_ ->
+                {
+                    this.level.destroyBlock(p_77725_, false);
+                });
+
         BlockState blockstate = BlockManager.DUNGEON_PORTAL.get().defaultBlockState().setValue(DungeonPortalBlock.AXIS, this.axis);
         BlockPos.betweenClosed(this.bottomLeft, this.bottomLeft.relative(Direction.UP, this.height - 1).relative(this.rightDir, this.width - 1))
                 .forEach(p_77725_ ->
