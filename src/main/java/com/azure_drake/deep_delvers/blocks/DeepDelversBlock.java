@@ -4,8 +4,8 @@ import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.world.level.block.Block;
 
 public class DeepDelversBlock extends Block {
-    public DeepDelversBlock(Properties p_49795_) {
-        super(p_49795_);
+    public DeepDelversBlock(Properties properties) {
+        super(properties);
     }
 
     public void GenerateModel(BlockModelGenerators blockModels)

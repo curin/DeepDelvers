@@ -1,10 +1,11 @@
 package com.azure_drake.deep_delvers.datagen;
 
-import net.minecraft.client.data.models.model.ModelTemplate;
-import net.minecraft.client.data.models.model.TextureMapping;
-import net.minecraft.client.data.models.model.TextureSlot;
-import net.minecraft.client.data.models.model.TexturedModel;
+import com.azure_drake.deep_delvers.blocks.ConnectedPillarState;
+import com.azure_drake.deep_delvers.blocks.DungeonPortalFrame;
+import net.minecraft.client.data.models.blockstates.*;
+import net.minecraft.client.data.models.model.*;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
 
 public class DeepDelversModelTemplates
@@ -55,4 +56,6 @@ public class DeepDelversModelTemplates
             // The template to generate from
             PORTAL_EW_TEMPLATE
     );
+
+
 }

@@ -2,9 +2,9 @@ package com.azure_drake.deep_delvers.blocks.entities;
 
 import com.azure_drake.deep_delvers.Config;
 import com.azure_drake.deep_delvers.blocks.BlockManager;
-import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
-import com.azure_drake.deep_delvers.dungeon.DungeonID;
-import com.azure_drake.deep_delvers.dungeon.DungeonManager;
+import com.azure_drake.deep_delvers.datagen.DataDriven;
+import com.azure_drake.deep_delvers.dungeon.*;
+import com.azure_drake.deep_delvers.items.PortalCatalyst;
 import com.azure_drake.deep_delvers.portal.DungeonPortal;
 import com.azure_drake.deep_delvers.portal.DungeonPortalShape;
 import com.azure_drake.deep_delvers.portal.PortalID;
@@ -12,6 +12,7 @@ import com.azure_drake.deep_delvers.portal.PortalState;
 import com.azure_drake.deep_delvers.world.DeepDelversData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 public class DungeonPortalSpawnerTileEntity extends BlockEntity
 {
@@ -57,7 +59,7 @@ public class DungeonPortalSpawnerTileEntity extends BlockEntity
         DungeonID id = DungeonPortal.GetDungeonId(pPos);
         DeepDungeon dungeon = data.getDungeon(id);
 
-        Optional<DungeonPortalShape> optional = DungeonPortalShape.findEmptyPortalShape(pLevel, pPos, Direction.Axis.X);
+        Optional<DungeonPortalShape> optional = DungeonPortalShape.findEmptyPortalShape(pLevel, pPos, Direction.Axis.X, PortalCatalyst.DEFAULT_FRAME_BLOCKS);
 
         if (optional.isEmpty()) {
             return;
@@ -90,14 +92,17 @@ public class DungeonPortalSpawnerTileEntity extends BlockEntity
         {
             if (pLevel.random.nextInt(100) < Config.InDungeonNexusChance)
             {
-                //TODO: Spawn Nexus or Connect to Nexus
+                //TODO: Spawn Nexus or Connect to Nexus (attempt to use Id 0 first)
             }
             else {
-                int depth = dungeon.Depth + (pLevel.random.nextInt(100) > 75 ? 1 : 0);
-                int tier = id.Tier;
-                if (depth > 4) {
-                    depth = 0;
-                    tier++;
+                int tier = dungeon.Tier + (pLevel.random.nextInt(100) > Config.HigherTierChance ? 1 : 0);
+                Holder<DungeonDepth> depth = dungeon.DepthData;
+                if (tier > dungeon.DepthData.value().TierCount()) {
+                    tier = 0;
+                    if (dungeon.DepthData.value().AllowDelvingToNextDepth())
+                    {
+                        depth = DataDriven.Weighted.Get(dungeon.DepthData.value().NextDepth(), pLevel.random).Value().get(DungeonRegistries.DUNGEON_DEPTH_KEY, pLevel).get();
+                    }
                 }
 
                 PortalID connected = optional.get().createPortalBlocks(tier, depth);

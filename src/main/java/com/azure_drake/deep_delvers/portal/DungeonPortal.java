@@ -1,6 +1,6 @@
 package com.azure_drake.deep_delvers.portal;
 
-import com.azure_drake.deep_delvers.blocks.DeepBlockTags;
+import com.azure_drake.deep_delvers.datagen.DataDriven;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
 import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
@@ -19,7 +19,9 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Portal;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
@@ -164,7 +166,7 @@ public class DungeonPortal
             x_id = -layer + steps;
         }
 
-        return new BlockUtil.FoundRectangle(new BlockPos(x_id * DungeonDistance, MIN_HEIGHT + (((DEPTH_COUNT - 1) - id.DungeonId.Tier) * DEPTH_HEIGHT),z_id * DungeonDistance), 5, 5);
+        return new BlockUtil.FoundRectangle(new BlockPos(x_id * DungeonDistance, MIN_HEIGHT + (((DEPTH_COUNT - 1) - id.DungeonId.Depth) * DEPTH_HEIGHT),z_id * DungeonDistance), 5, 5);
     }
 
     public static TeleportTransition GetTransition(PortalID portalId, ServerLevel pLevel, Entity pEntity, BlockPos pPos)
@@ -357,9 +359,17 @@ public class DungeonPortal
         return new TeleportTransition(pLevel, vec32, vec3, pYRot + (float)i, pXRot, pPostDimensionTransition);
     }
 
-    public static boolean isPortalFrame(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos)
+    public static class IsFramePredicate implements BlockBehaviour.StatePredicate
     {
-        return blockState.is(DeepBlockTags.DEEP_DUNGEON_PORTAL);
+        public IsFramePredicate(DataDriven<Block> validFrame)
+        {
+            ValidFrame = validFrame;
+        }
+        public DataDriven<Block> ValidFrame;
+        @Override
+        public boolean test(BlockState state, BlockGetter level, BlockPos pos) {
+            return (ValidFrame.Tag().isEmpty() || !state.is(ValidFrame.Tag().get())) || (ValidFrame.Key().isEmpty() || !state.is(ValidFrame.Key().get()));
+        }
     }
 
     public static final String LevelBoundsMinX = "LevelBounds.Min.X";

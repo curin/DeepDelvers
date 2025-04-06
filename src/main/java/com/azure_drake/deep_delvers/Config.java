@@ -14,11 +14,9 @@ public class Config
 {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-
-
-    private static final ModConfigSpec.IntValue LOWER_DEPTH_CHANCE = BUILDER
-            .comment("chance for a spawned portal to lower the depth in the dungeon")
-            .defineInRange("lowerDepthChance", 75, 0, 100);
+    private static final ModConfigSpec.IntValue HIGHER_TIER_CHANCE = BUILDER
+            .comment("chance for a spawned portal to higher the tier in the dungeon")
+            .defineInRange("higherTierChance", 75, 0, 100);
 
     private static final ModConfigSpec.IntValue IN_DUNGEON_NEXUS_CHANCE = BUILDER
             .comment("chance for a spawned portal to send you to the nexus")
@@ -42,7 +40,7 @@ public class Config
     static final ModConfigSpec SPEC = BUILDER.build();
 
     public static int InDungeonNexusChance;
-    public static int LowerDepthChance;
+    public static int HigherTierChance;
 
     /*
     public static boolean logDirtBlock;
@@ -59,7 +57,7 @@ public class Config
     static void onLoad(final ModConfigEvent event)
     {
         InDungeonNexusChance = IN_DUNGEON_NEXUS_CHANCE.get();
-        LowerDepthChance = LOWER_DEPTH_CHANCE.get();
+        HigherTierChance = HIGHER_TIER_CHANCE.get();
 
         /*
         logDirtBlock = LOG_DIRT_BLOCK.get();

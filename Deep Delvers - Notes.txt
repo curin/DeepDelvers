@@ -1,0 +1,77 @@
+Add method to blacklist/whitelist what can be broken in a given room and whether building is allowed or not
+- Maybe allow building with specific tags (like adventure mode)
+- should it be room or whole dungeon
+- should we just use adventure mode?
+  + Then how do we stop just going into survival
+  
+Dungeon System
+- Structure System with Extra info
+  + Exit Info
+  + Size Info (defined in increments of 16)
+  + Building Rules
+  + Item/Ability Usage Rules
+	- Elytra
+	- Double Jump
+	- etc.
+  + Is Starting Room
+  + Is Boss/Exit Room
+  + Portal Location
+  + Allowed Layers
+  - Also Extra Size to allow for larger rooms
+- Dungeon Tile Block
+  + Defines a nearby Area as a dungeon tile based on settings
+	= auto encase in deep rock
+	= use phantom blocks for working
+	  * setting as exit makes blocks physical and can be editted
+	  * If not exit section, do not allow placement in phantom block
+  + Save/Load Tiles
+  + Defines
+	= Exits
+	= Size (defined in increments of 16) (max height 80) (above 48 floor or ceiling is required)
+	= Build Rules
+	= Tags to be added to
+	= Item/Ability Usage Rules 
+	= Is Starting Room (requires Portal Spawner Blocks)
+	= Allowed Layers (height in dungeon) (based on bottom of room)
+  + Portal Is Defined by Spawner Blocks (all touching are considered one portal
+- Dungeon Theme Manager
+  + Defines Dungeon Themes
+  + Set of tiles for general use, entrance rooms, boss rooms
+    = # to use tags for groups of tiles
+- Dungeon Spawner
+  + Spawns Enemies in Wave(s)
+  + Waves can be
+	= Specific
+	= Random from pool
+  + Waves can run
+	= Infinite times
+	= Finite times
+	= Once
+  + Waves can be timed
+  + Can link to Reward Spawner
+  + Can be Boss Spawner (locks to only run once)
+- Reward Spawner
+  + Spawns rewards from set of loot tables
+	= loot table can be defined in spawner
+  + Can Define Spawn Location
+    = Either drop, player inventory (all or random player), or spawn chest
+  + Can Spawn when
+	= triggered by Redstone
+	= triggered by Dungeon Spawner
+	= triggered by right click
+	= triggered by proximity of entity
+	  * With blacklist/whitelist for enemies, players, etc
+	  * count included (optionally, player count or relative to player count) (include min/max)
+	= triggered by item feed (dropped nearby/on)
+	  * with list of items required
+	  * can have total count with just types accepted
+- Invisible Tripwire hook
+  + can be disguised as another block
+- Hidden Pressure plate
+  + drops into block when stepped on
+- Block Randomizer
+  + randomly is replaced with another block
+  + can be linked into groups
+    = groups can be with or without replacement
+	= groups are tile or dungeon wide (lists kept separately)
+  + takes a list of itemStacks where count determines probability or how many can be placed without replacement

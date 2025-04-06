@@ -1,5 +1,7 @@
 package com.azure_drake.deep_delvers.blocks;
 
+import com.azure_drake.deep_delvers.datagen.DeepDelversBlockStates;
+import com.azure_drake.deep_delvers.datagen.DeepDelversModelTemplates;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.client.data.models.blockstates.PropertyDispatch;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.neoforged.api.distmarker.Dist;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -226,160 +229,7 @@ public class DungeonPortalFrame extends DeepDelversBlock {
 
         blockModels.blockStateOutput
                 .accept(
-                        MultiVariantGenerator.multiVariant(this)
-                                .with(
-                                        PropertyDispatch.properties(FACING, CONNECTED_STATE)
-                                                .select(
-                                                        Direction.UP,
-                                                        ConnectedPillarState.Single,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location))
-                                                )
-                                                .select(
-                                                        Direction.DOWN,
-                                                        ConnectedPillarState.Single,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location))
-                                                )
-                                                .select(
-                                                        Direction.NORTH,
-                                                        ConnectedPillarState.Single,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location))
-                                                )
-                                                .select(
-                                                        Direction.SOUTH,
-                                                        ConnectedPillarState.Single,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location))
-                                                )
-                                                .select(
-                                                        Direction.EAST,
-                                                        ConnectedPillarState.Single,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location))
-                                                )
-                                                .select(
-                                                        Direction.WEST,
-                                                        ConnectedPillarState.Single,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location))
-                                                )
-                                                .select(
-                                                        Direction.UP,
-                                                        ConnectedPillarState.Middle,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_middle"))
-                                                )
-                                                .select(
-                                                        Direction.DOWN,
-                                                        ConnectedPillarState.Middle,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_middle"))
-                                                )
-                                                .select(
-                                                        Direction.NORTH,
-                                                        ConnectedPillarState.Middle,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_middle_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.SOUTH,
-                                                        ConnectedPillarState.Middle,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_middle_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.EAST,
-                                                        ConnectedPillarState.Middle,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_middle_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.WEST,
-                                                        ConnectedPillarState.Middle,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_middle_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.UP,
-                                                        ConnectedPillarState.Edge,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_edge"))
-                                                )
-                                                .select(
-                                                        Direction.DOWN,
-                                                        ConnectedPillarState.Edge,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_edge"))
-                                                )
-                                                .select(
-                                                        Direction.NORTH,
-                                                        ConnectedPillarState.Edge,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_edge_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.SOUTH,
-                                                        ConnectedPillarState.Edge,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_edge_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.EAST,
-                                                        ConnectedPillarState.Edge,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_edge_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.WEST,
-                                                        ConnectedPillarState.Edge,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_edge_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.UP,
-                                                        ConnectedPillarState.Cap,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_cap"))
-                                                )
-                                                .select(
-                                                        Direction.DOWN,
-                                                        ConnectedPillarState.Cap,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_cap"))
-                                                )
-                                                .select(
-                                                        Direction.NORTH,
-                                                        ConnectedPillarState.Cap,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_cap_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.SOUTH,
-                                                        ConnectedPillarState.Cap,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_cap_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R270)
-                                                )
-                                                .select(
-                                                        Direction.EAST,
-                                                        ConnectedPillarState.Cap,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_cap_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
-                                                )
-                                                .select(
-                                                        Direction.WEST,
-                                                        ConnectedPillarState.Cap,
-                                                        Variant.variant()
-                                                                .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(location, "_cap_horizontal"))
-                                                                .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-                                                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
-                                                )
-                                )
+                        DeepDelversBlockStates.DungeonPortalFrame(this, location)
                 );
 
         if (!generateModels)

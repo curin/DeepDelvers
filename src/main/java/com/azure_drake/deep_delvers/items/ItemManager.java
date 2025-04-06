@@ -2,11 +2,12 @@ package com.azure_drake.deep_delvers.items;
 
 import com.azure_drake.deep_delvers.DeepDelversMod;
 import com.azure_drake.deep_delvers.blocks.BlockManager;
-import com.azure_drake.deep_delvers.blocks.DeepDelversBlock;
+import com.azure_drake.deep_delvers.datagen.DataDriven;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -47,9 +48,15 @@ public class ItemManager {
     public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME = RegisterBlockItem(BlockManager.DUNGEON_PORTAL_FRAME);
     public static final DeferredItem<BlockItem> DUNGEON_PORTAL_FRAME_COSMETIC = RegisterBlockItem(BlockManager.DUNGEON_PORTAL_FRAME_COSMETIC, BlockManager.DUNGEON_PORTAL_FRAME);
 
-    //public static final DeferredItem<BlockItem> DUNGEON_PORTAL = RegisterBlockItem(BlockManager.DUNGEON_PORTAL, false);
     public static final DeferredItem<BlockItem> DUNGEON_PORTAL_SPAWNER = RegisterBlockItem(BlockManager.DUNGEON_PORTAL_SPAWNER, false);
 
+    public static final DeferredItem<BlockItem> DUNGEON_BLOCK_RANDOMIZER = RegisterBlockItem(BlockManager.DUNGEON_BLOCK_RANDOMIZER);
+    public static final DeferredItem<BlockItem> DUNGEON_PRESSURE_PLATE = RegisterBlockItem(BlockManager.DUNGEON_PRESSURE_PLATE);
+    public static final DeferredItem<BlockItem> DUNGEON_REWARD_SPAWNER = RegisterBlockItem(BlockManager.DUNGEON_REWARD_SPAWNER);
+    public static final DeferredItem<BlockItem> DUNGEON_SPAWNER = RegisterBlockItem(BlockManager.DUNGEON_SPAWNER);
+    public static final DeferredItem<BlockItem> DUNGEON_THEME_MANAGER = RegisterBlockItem(BlockManager.DUNGEON_THEME_MANAGER);
+    public static final DeferredItem<BlockItem> DUNGEON_TILE_MANAGER = RegisterBlockItem(BlockManager.DUNGEON_TILE_MANAGER);
+    public static final DeferredItem<BlockItem> HIDDEN_TRIPWIRE_HOOK = RegisterBlockItem(BlockManager.HIDDEN_TRIPWIRE_HOOK);
 
     // The specialized DeferredRegister.DataComponents simplifies data component registration and avoids some generic inference issues with the `DataComponentType.Builder` within a `Supplier`
     public static final DeferredRegister.DataComponents COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, DeepDelversMod.MODID);
@@ -57,8 +64,11 @@ public class ItemManager {
     public static final Supplier<DataComponentType<Integer>> CATALYST_TIER = COMPONENTS.registerComponentType("catalyst_tier",
             builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT));
 
-    public static final Supplier<DataComponentType<Integer>> CATALYST_DEPTH = COMPONENTS.registerComponentType("catalyst_depth",
-            builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT));
+    public static final Supplier<DataComponentType<ResourceLocation>> CATALYST_DEPTH = COMPONENTS.registerComponentType("catalyst_depth",
+            builder -> builder.persistent(ResourceLocation.CODEC).networkSynchronized(ResourceLocation.STREAM_CODEC));
+
+    public static final Supplier<DataComponentType<DataDriven<Block>>> CATALYST_FRAME_BLOCKS = COMPONENTS.registerComponentType("catalyst_frame_blocks",
+            builder -> builder.persistent(DataDriven.DIRECT_CODEC(Registries.BLOCK)).networkSynchronized(DataDriven.STREAM_CODEC(Registries.BLOCK)));
 
     public static void register(IEventBus modEventBus)
     {

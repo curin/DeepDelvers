@@ -4,18 +4,18 @@ import net.minecraft.nbt.CompoundTag;
 
 public class DungeonID
 {
-    public DungeonID(int id, int tier)
+    public DungeonID(int id, int depth)
     {
-        Tier = tier;
+        Depth = depth;
         Id = id;
     }
 
     public int Id;
-    public int Tier;
+    public int Depth;
     public CompoundTag serializeNBT()
     {
         CompoundTag tag = new CompoundTag();
-        tag.putInt("Tier", Tier);
+        tag.putInt("Depth", Depth);
         tag.putInt("Id", Id);
 
         return tag;
@@ -23,7 +23,7 @@ public class DungeonID
 
     public static DungeonID deserializeNbt(CompoundTag tag)
     {
-        return new DungeonID(tag.getInt("Id"), tag.getInt("Tier"));
+        return new DungeonID(tag.getInt("Id"), tag.getInt("Depth"));
     }
 
     @Override
@@ -33,11 +33,11 @@ public class DungeonID
             return false;
         }
 
-        return id.Id == Id && id.Tier == Tier;
+        return id.Id == Id && id.Depth == Depth;
     }
 
     @Override
     public int hashCode() {
-        return Id + (Tier * 10000000);
+        return Id + (Depth * 10000000);
     }
 }

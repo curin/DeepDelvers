@@ -1,8 +1,7 @@
 package com.azure_drake.deep_delvers.blocks;
 
 import com.azure_drake.deep_delvers.DeepDelversMod;
-import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalSpawnerTileEntity;
-import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
+import com.azure_drake.deep_delvers.blocks.entities.*;
 import com.azure_drake.deep_delvers.items.DeepDelversItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
@@ -33,15 +32,40 @@ public class BlockManager {
 
     public static final DeferredBlock<DeepDelversBlock> DEEP_ROCK = RegisterBlock("deep_rock", BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
 
-    public static final DeferredBlock<DungeonPortalBlock> DUNGEON_PORTAL = RegisterBlock("dungeon_portal", DungeonPortalBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.NETHER_PORTAL).lightLevel(i -> 8));
-
-    public static final DeferredBlock<DungeonPortalSpawner> DUNGEON_PORTAL_SPAWNER = RegisterBlock("dungeon_portal_spawner", DungeonPortalSpawner::new, BlockBehaviour.Properties.ofFullCopy(Blocks.FIRE));
-
     public static final DeferredBlock<DungeonPortalFrame> DUNGEON_PORTAL_FRAME = RegisterBlock("dungeon_portal_frame", DungeonPortalFrame::Standard, BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS));
     public static final DeferredBlock<DungeonPortalFrame> DUNGEON_PORTAL_FRAME_COSMETIC = RegisterBlock("dungeon_portal_frame_cosmetic", DungeonPortalFrame::Cosmetic, BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS));
+
+    public static final DeferredBlock<DungeonPressurePlate> DUNGEON_PRESSURE_PLATE = RegisterBlock("dungeon_pressure_plate", DungeonPressurePlate::new, BlockBehaviour.Properties.ofFullCopy(Blocks.DEEPSLATE_BRICKS));
+
+    public static final DeferredBlock<DungeonBlockRandomizer> DUNGEON_BLOCK_RANDOMIZER = RegisterBlock("dungeon_block_randomizer", DungeonBlockRandomizer::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
+    public static final Supplier<BlockEntityType<DungeonBlockRandomizerTileEntity>> DUNGEON_BLOCK_RANDOMIZER_ENTITY = BLOCK_ENTITIES.register("dungeon_block_randomizer",
+            () -> new BlockEntityType<>(DungeonBlockRandomizerTileEntity::new, DUNGEON_BLOCK_RANDOMIZER.get()));
+
+    public static final DeferredBlock<DungeonRewardSpawner> DUNGEON_REWARD_SPAWNER = RegisterBlock("dungeon_reward_spawner", DungeonRewardSpawner::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
+    public static final Supplier<BlockEntityType<DungeonRewardSpawnerTileEntity>> DUNGEON_REWARD_SPAWNER_ENTITY = BLOCK_ENTITIES.register("dungeon_reward_spawner",
+            () -> new BlockEntityType<>(DungeonRewardSpawnerTileEntity::new, DUNGEON_REWARD_SPAWNER.get()));
+
+    public static final DeferredBlock<DungeonRewardSpawner> DUNGEON_SPAWNER = RegisterBlock("dungeon_spawner", DungeonRewardSpawner::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
+    public static final Supplier<BlockEntityType<DungeonSpawnerTileEntity>> DUNGEON_SPAWNER_ENTITY = BLOCK_ENTITIES.register("dungeon_spawner",
+            () -> new BlockEntityType<>(DungeonSpawnerTileEntity::new, DUNGEON_SPAWNER.get()));
+
+    public static final DeferredBlock<DungeonThemeManager> DUNGEON_THEME_MANAGER = RegisterBlock("dungeon_theme_manager", DungeonThemeManager::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
+    public static final Supplier<BlockEntityType<DungeonThemeManagerTileEntity>> DUNGEON_THEME_MANAGER_ENTITY = BLOCK_ENTITIES.register("dungeon_theme_manager",
+            () -> new BlockEntityType<>(DungeonThemeManagerTileEntity::new, DUNGEON_THEME_MANAGER.get()));
+
+    public static final DeferredBlock<DungeonTileManager> DUNGEON_TILE_MANAGER = RegisterBlock("dungeon_tile_manager", DungeonTileManager::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
+    public static final Supplier<BlockEntityType<DungeonTileManagerTileEntity>> DUNGEON_TILE_MANAGER_ENTITY = BLOCK_ENTITIES.register("dungeon_tile_manager",
+            () -> new BlockEntityType<>(DungeonTileManagerTileEntity::new, DUNGEON_TILE_MANAGER.get()));
+
+    public static final DeferredBlock<HiddenTripwireHook> HIDDEN_TRIPWIRE_HOOK = RegisterBlock("hidden_tripwire_hook", HiddenTripwireHook::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK));
+    public static final Supplier<BlockEntityType<HiddenTripwireHookTileEntity>> HIDDEN_TRIPWIRE_HOOK_ENTITY = BLOCK_ENTITIES.register("hidden_tripwire_hook",
+            () -> new BlockEntityType<>(HiddenTripwireHookTileEntity::new, HIDDEN_TRIPWIRE_HOOK.get()));
+
+    public static final DeferredBlock<DungeonPortalBlock> DUNGEON_PORTAL = RegisterBlock("dungeon_portal", DungeonPortalBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.NETHER_PORTAL).lightLevel(i -> 8));
     public static final Supplier<BlockEntityType<DungeonPortalTileEntity>> DUNGEON_PORTAL_ENTITY = BLOCK_ENTITIES.register("dungeon_portal",
             () -> new BlockEntityType<>(DungeonPortalTileEntity::new, DUNGEON_PORTAL.get()));
 
+    public static final DeferredBlock<DungeonPortalSpawner> DUNGEON_PORTAL_SPAWNER = RegisterBlock("dungeon_portal_spawner", DungeonPortalSpawner::new, BlockBehaviour.Properties.ofFullCopy(Blocks.FIRE));
     public static final Supplier<BlockEntityType<DungeonPortalSpawnerTileEntity>> DUNGEON_PORTAL_SPAWNER_ENTITY = BLOCK_ENTITIES.register("dungeon_portal_spawner",
             () -> new BlockEntityType<>(DungeonPortalSpawnerTileEntity::new, DUNGEON_PORTAL_SPAWNER.get()));
 

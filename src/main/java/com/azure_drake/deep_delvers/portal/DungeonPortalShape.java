@@ -3,17 +3,21 @@ package com.azure_drake.deep_delvers.portal;
 import com.azure_drake.deep_delvers.blocks.BlockManager;
 import com.azure_drake.deep_delvers.blocks.DungeonPortalBlock;
 import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
+import com.azure_drake.deep_delvers.datagen.DataDriven;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
+import com.azure_drake.deep_delvers.dungeon.DungeonDepth;
 import com.azure_drake.deep_delvers.dungeon.DungeonID;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -31,7 +35,10 @@ public class DungeonPortalShape
     public static final int MAX_WIDTH = 21;
     private static final int MIN_HEIGHT = 3;
     public static final int MAX_HEIGHT = 21;
-    private static final BlockBehaviour.StatePredicate FRAME = DungeonPortal::isPortalFrame;
+    private static BlockBehaviour.StatePredicate FRAME(DataDriven<Block> validFrame)
+    {
+        return new DungeonPortal.IsFramePredicate(validFrame);
+    }
     private static final float SAFE_TRAVEL_MAX_ENTITY_XY = 4.0F;
     private static final double SAFE_TRAVEL_MAX_VERTICAL_DELTA = 1.0;
     private final Level level;
@@ -43,39 +50,40 @@ public class DungeonPortalShape
     private int height;
     private final int width;
 
-    public static Optional<DungeonPortalShape> findEmptyPortalShape(Level pLevel, BlockPos pBottomLeft, Direction.Axis pAxis) {
-        return findPortalShape(pLevel, pBottomLeft, p_77727_ -> p_77727_.isValid() && p_77727_.numPortalBlocks == 0, pAxis);
+    public static Optional<DungeonPortalShape> findEmptyPortalShape(Level pLevel, BlockPos pBottomLeft, Direction.Axis pAxis, DataDriven<Block> validFrame) {
+        return findPortalShape(pLevel, pBottomLeft, p_77727_ -> p_77727_.isValid() && p_77727_.numPortalBlocks == 0, pAxis, validFrame);
     }
 
-    public static Optional<DungeonPortalShape> findPortalShape(Level pLevel, BlockPos pBottomLeft, Predicate<DungeonPortalShape> pPredicate, Direction.Axis pAxis) {
-        Optional<DungeonPortalShape> optional = Optional.of(new DungeonPortalShape(pLevel, pBottomLeft, pAxis)).filter(pPredicate);
+    public static Optional<DungeonPortalShape> findPortalShape(Level pLevel, BlockPos pBottomLeft, Predicate<DungeonPortalShape> pPredicate, Direction.Axis pAxis, DataDriven<Block> validFrame) {
+        Optional<DungeonPortalShape> optional = Optional.of(new DungeonPortalShape(pLevel, pBottomLeft, pAxis, validFrame)).filter(pPredicate);
         if (optional.isPresent()) {
             return optional;
         } else {
             Direction.Axis direction$axis = pAxis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-            return Optional.of(new DungeonPortalShape(pLevel, pBottomLeft, direction$axis)).filter(pPredicate);
+            return Optional.of(new DungeonPortalShape(pLevel, pBottomLeft, direction$axis, validFrame)).filter(pPredicate);
         }
     }
 
-    public DungeonPortalShape(Level pLevel, BlockPos pBottomLeft, Direction.Axis pAxis) {
+    public DungeonPortalShape(Level pLevel, BlockPos pBottomLeft, Direction.Axis pAxis, DataDriven<Block> validFrame) {
+        BlockBehaviour.StatePredicate frame = FRAME(validFrame);
         this.level = pLevel;
         this.axis = pAxis;
         this.rightDir = pAxis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
-        this.bottomLeft = this.calculateBottomLeft(pBottomLeft);
+        this.bottomLeft = this.calculateBottomLeft(pBottomLeft, frame);
         if (this.bottomLeft == null) {
             this.bottomLeft = pBottomLeft;
             this.width = 1;
             this.height = 1;
         } else {
-            this.width = this.calculateWidth();
+            this.width = this.calculateWidth(frame);
             if (this.width > 0) {
-                this.height = this.calculateHeight();
+                this.height = this.calculateHeight(frame);
             }
         }
     }
 
     @Nullable
-    private BlockPos calculateBottomLeft(BlockPos pPos) {
+    private BlockPos calculateBottomLeft(BlockPos pPos, BlockBehaviour.StatePredicate frame) {
         int i = Math.max(this.level.getMinY(), pPos.getY() - 21);
 
         while (pPos.getY() > i && isEmpty(this.level.getBlockState(pPos.below()))) {
@@ -83,30 +91,30 @@ public class DungeonPortalShape
         }
 
         Direction direction = this.rightDir.getOpposite();
-        int j = this.getDistanceUntilEdgeAboveFrame(pPos, direction) - 1;
+        int j = this.getDistanceUntilEdgeAboveFrame(pPos, direction, frame) - 1;
         return j < 0 ? null : pPos.relative(direction, j);
     }
 
-    private int calculateWidth() {
-        int i = this.getDistanceUntilEdgeAboveFrame(this.bottomLeft, this.rightDir);
+    private int calculateWidth(BlockBehaviour.StatePredicate frame) {
+        int i = this.getDistanceUntilEdgeAboveFrame(this.bottomLeft, this.rightDir, frame);
         return i >= 2 && i <= 21 ? i : 0;
     }
 
-    private int getDistanceUntilEdgeAboveFrame(BlockPos pPos, Direction pDirection) {
+    private int getDistanceUntilEdgeAboveFrame(BlockPos pPos, Direction pDirection, BlockBehaviour.StatePredicate frame) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
         for (int i = 0; i <= 21; i++) {
             blockpos$mutableblockpos.set(pPos).move(pDirection, i);
             BlockState blockstate = this.level.getBlockState(blockpos$mutableblockpos);
             if (!isEmpty(blockstate)) {
-                if (FRAME.test(blockstate, this.level, blockpos$mutableblockpos)) {
+                if (frame.test(blockstate, this.level, blockpos$mutableblockpos)) {
                     return i;
                 }
                 break;
             }
 
             BlockState blockstate1 = this.level.getBlockState(blockpos$mutableblockpos.move(Direction.DOWN));
-            if (!FRAME.test(blockstate1, this.level, blockpos$mutableblockpos)) {
+            if (!frame.test(blockstate1, this.level, blockpos$mutableblockpos)) {
                 break;
             }
         }
@@ -114,16 +122,16 @@ public class DungeonPortalShape
         return 0;
     }
 
-    private int calculateHeight() {
+    private int calculateHeight(BlockBehaviour.StatePredicate frame) {
         BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-        int i = this.getDistanceUntilTop(blockpos$mutableblockpos);
-        return i >= 3 && i <= 21 && this.hasTopFrame(blockpos$mutableblockpos, i) ? i : 0;
+        int i = this.getDistanceUntilTop(blockpos$mutableblockpos, frame);
+        return i >= 3 && i <= 21 && this.hasTopFrame(blockpos$mutableblockpos, i, frame) ? i : 0;
     }
 
-    private boolean hasTopFrame(BlockPos.MutableBlockPos pPos, int pDistanceToTop) {
+    private boolean hasTopFrame(BlockPos.MutableBlockPos pPos, int pDistanceToTop, BlockBehaviour.StatePredicate frame) {
         for (int i = 0; i < this.width; i++) {
             BlockPos.MutableBlockPos blockpos$mutableblockpos = pPos.set(this.bottomLeft).move(Direction.UP, pDistanceToTop).move(this.rightDir, i);
-            if (!FRAME.test(this.level.getBlockState(blockpos$mutableblockpos), this.level, blockpos$mutableblockpos)) {
+            if (!frame.test(this.level.getBlockState(blockpos$mutableblockpos), this.level, blockpos$mutableblockpos)) {
                 return false;
             }
         }
@@ -131,15 +139,15 @@ public class DungeonPortalShape
         return true;
     }
 
-    private int getDistanceUntilTop(BlockPos.MutableBlockPos pPos) {
+    private int getDistanceUntilTop(BlockPos.MutableBlockPos pPos, BlockBehaviour.StatePredicate frame) {
         for (int i = 0; i < 21; i++) {
             pPos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, -1);
-            if (!FRAME.test(this.level.getBlockState(pPos), this.level, pPos)) {
+            if (!frame.test(this.level.getBlockState(pPos), this.level, pPos)) {
                 return i;
             }
 
             pPos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, this.width);
-            if (!FRAME.test(this.level.getBlockState(pPos), this.level, pPos)) {
+            if (!frame.test(this.level.getBlockState(pPos), this.level, pPos)) {
                 return i;
             }
 
@@ -167,7 +175,7 @@ public class DungeonPortalShape
         return this.bottomLeft != null && this.width >= 2 && this.width <= 21 && this.height >= 3 && this.height <= 21;
     }
 
-    public PortalID createPortalBlocks(int tier, int depth) {
+    public PortalID createPortalBlocks(int tier, Holder<DungeonDepth> depth) {
         if (level.getServer() == null)
         {
             return new PortalID(new DungeonID(-1, -1), -1);

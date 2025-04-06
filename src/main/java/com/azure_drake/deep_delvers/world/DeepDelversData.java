@@ -11,14 +11,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DeepDelversData extends SavedData {
     public static final String Dungeon_Key ="Dungeons";
+    public static final String NEXUS_KEY ="NexusIds";
 
     private Map<DungeonID, DeepDungeon> DungeonRegistry = new HashMap<>();
+    private List<Integer> Nexus_Ids = new ArrayList<Integer>();
 
     public DeepDungeon getDungeon(DungeonID id)
     {
@@ -50,7 +50,7 @@ public class DeepDelversData extends SavedData {
                 changed = true;
                 dungeon.PlayersInside.remove(index);
 
-                if (dungeon.PlayersInside.size() == 0 && id.Id != 0)
+                if (dungeon.PlayersInside.size() == 0 && !dungeon.IsNexus)
                 {
                     DungeonRegistry.remove(id);
                     dungeon.Destroy(server, false);
@@ -115,7 +115,7 @@ public class DeepDelversData extends SavedData {
         CompoundTag saveTag = new CompoundTag();
         for (DungeonID dungeonID : DungeonRegistry.keySet())
         {
-            String TierString = String.valueOf(dungeonID.Tier);
+            String TierString = String.valueOf(dungeonID.Depth);
             if (!saveTag.contains(TierString))
                 saveTag.put(TierString, new CompoundTag());
 
@@ -123,8 +123,10 @@ public class DeepDelversData extends SavedData {
             CompoundTag tierTag = saveTag.getCompound(TierString);
             tierTag.put(String.valueOf(dungeonID.Id), dungeon.saveToNbt());
         }
+
         CompoundTag mainTag = new CompoundTag();
         mainTag.put(Dungeon_Key, saveTag);
+        mainTag.putIntArray(NEXUS_KEY, Nexus_Ids);
         pTag.put(DeepDelversMod.MODID, mainTag);
         return pTag;
     }
@@ -157,6 +159,12 @@ public class DeepDelversData extends SavedData {
             }
         }
 
+        int[] ids = mainTag.getIntArray(NEXUS_KEY);
+        for (Integer id : ids)
+        {
+            data.Nexus_Ids.add(id);
+        }
+
         return data;
     }
 
@@ -165,7 +173,7 @@ public class DeepDelversData extends SavedData {
         DungeonID ret = new DungeonID(1, tier);
 
         DeepDelversData deepData = DeepDelversData.get(level.getServer().getLevel(DungeonManager.DEEP_DUGEON));
-        while (deepData.containsDungeon(ret))
+        while (deepData.containsDungeon(ret) || deepData.Nexus_Ids.contains(ret.Id))
         {
             ret.Id++;
         }

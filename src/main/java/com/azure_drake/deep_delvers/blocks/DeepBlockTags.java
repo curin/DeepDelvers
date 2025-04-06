@@ -9,7 +9,12 @@ import net.minecraft.world.level.block.Block;
 public class DeepBlockTags
 {
     public static final TagKey<Block> DEEP_DUNGEON_PORTAL = create("deep_dungeon_portal");
-    private static TagKey<Block> create(String pName) {
+    public static final TagKey<Block> TRIPWIRE_HOOK = createCommon("tripwire_hook");
+    public static TagKey<Block> create(String pName) {
         return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(DeepDelversMod.MODID, pName));
+    }
+
+    public static TagKey<Block> createCommon(String pName) {
+        return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("c", pName));
     }
 }

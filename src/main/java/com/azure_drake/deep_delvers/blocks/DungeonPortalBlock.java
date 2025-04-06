@@ -1,6 +1,7 @@
 package com.azure_drake.deep_delvers.blocks;
 
 import com.azure_drake.deep_delvers.blocks.entities.DungeonPortalTileEntity;
+import com.azure_drake.deep_delvers.datagen.DeepDelversBlockStates;
 import com.azure_drake.deep_delvers.datagen.DeepDelversModelTemplates;
 import com.azure_drake.deep_delvers.dungeon.DeepDungeon;
 import com.azure_drake.deep_delvers.dungeon.DungeonManager;
@@ -197,18 +198,7 @@ public class DungeonPortalBlock extends DeepDelversBlock implements Portal, Enti
     {
         blockModels.blockStateOutput
                 .accept(
-                        MultiVariantGenerator.multiVariant(this)
-                                .with(
-                                        PropertyDispatch.property(BlockStateProperties.HORIZONTAL_AXIS)
-                                                .select(
-                                                        Direction.Axis.X,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(this, "_ns"))
-                                                )
-                                                .select(
-                                                        Direction.Axis.Z,
-                                                        Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(this, "_ew"))
-                                                )
-                                )
+                        DeepDelversBlockStates.DungeonPortal(this)
                 );
 
         DeepDelversModelTemplates.PORTAL_NS_TEMPLATE_PROVIDER.createWithSuffix(this, "_ns", blockModels.modelOutput);

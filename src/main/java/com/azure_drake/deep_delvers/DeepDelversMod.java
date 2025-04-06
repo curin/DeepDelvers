@@ -2,14 +2,21 @@ package com.azure_drake.deep_delvers;
 
 import com.azure_drake.deep_delvers.blocks.BlockManager;
 import com.azure_drake.deep_delvers.creativetab.CreativeTabManager;
+import com.azure_drake.deep_delvers.dungeon.DungeonRegistries;
+import com.azure_drake.deep_delvers.gui.MenuManager;
+import com.azure_drake.deep_delvers.gui.screens.DungeonTileManagerScreen;
 import com.azure_drake.deep_delvers.items.ItemManager;
 import com.azure_drake.deep_delvers.world.WorldEventHandler;
 import com.mojang.logging.LogUtils;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
@@ -29,14 +36,15 @@ public class DeepDelversMod
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
-        // Register Blocks, Items, and CreativeTabs
+        // Register Blocks, Items, menus, and CreativeTabs
         BlockManager.register(modEventBus);
         ItemManager.register(modEventBus);
         CreativeTabManager.register(modEventBus);
+        MenuManager.register(modEventBus);
+        DungeonRegistries.register(modEventBus);
 
         // Register event Handlers
         NeoForge.EVENT_BUS.register(new WorldEventHandler());
-        // modEventBus.addListener(DatagenEventHandler::gatherData);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -45,5 +53,14 @@ public class DeepDelversMod
     private void commonSetup(final FMLCommonSetupEvent event)
     {
         // Some common setup code
+    }
+
+    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
+    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class ClientModEvents {
+        @SubscribeEvent
+        public static void registerScreens(RegisterMenuScreensEvent event) {
+            event.register(MenuManager.DUNGEON_TILE_MANAGER_MENU.get(), DungeonTileManagerScreen::new);
+        }
     }
 }
